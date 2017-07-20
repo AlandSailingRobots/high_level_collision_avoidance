@@ -51,7 +51,7 @@ IntervalVector right(const IntervalVector& X){
 
 
 void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>& listBoxes){
-    if (X.max_diam() < 0.3){
+    if (X.max_diam() < 0.5){
         return;
     }
     IntervalVector XinEnd(2);

@@ -11,7 +11,7 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
     double boatHead;
     boatHead = acos(waypoints[1][0]/(sqrt(pow(waypoints[1][0],2)+pow(waypoints[1][1],2))));
 
-    Interval T(0,0);
+    Interval T;
 
     for ( int i = 1; i< waypoints.size(); i++){
         //cout << "heading " << boatHead << endl; 
@@ -20,13 +20,12 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
             boatState[0] = boatSpeed[i-2]*cos(boatHead)*T.ub() + boatState[0];
             boatState[1] = boatSpeed[i-2]*sin(boatHead)*T.ub() + boatState[1];
             //cout << "speed " << i-2 << " " << boatSpeed[i-2] << endl;
-        }
-        
 
-        for (int j = 0; j < obstacles.size(); j++){
-            obstacles[j][1] = obstacles[j][0]*cos(obstacles[j][3])*T.ub() + obstacles[j][1];
-            obstacles[j][2] = obstacles[j][0]*sin(obstacles[j][3])*T.ub() + obstacles[j][2];
-        }
+            for (int j = 0; j < obstacles.size(); j++){
+                obstacles[j][1] = obstacles[j][0]*cos(obstacles[j][3])*T.ub() + obstacles[j][1];
+                obstacles[j][2] = obstacles[j][0]*sin(obstacles[j][3])*T.ub() + obstacles[j][2];
+            }
+        }        
 
         T = Interval(0, (sqrt(pow(waypoints[i][0] - waypoints[i-1][0],2)+pow(waypoints[i][1] - waypoints[i-1][1],2)))/boatSpeed[i-1].mid());
 
@@ -118,7 +117,13 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     else if (newSpeed[0].mid() >= 0 && newSpeed[1].mid() < 0){
         boatHead = atan(newSpeed[1].mid()/newSpeed[0].mid());
     }
-    speed = newSpeed[0]/cos(boatHead);
+    if (newSpeed[0].diam() < newSpeed[1].diam()){
+        speed = newSpeed[0]/cos(boatHead);
+    }
+    else{
+        speed = newSpeed[1]/sin(boatHead);
+    }
+    //speed = (newSpeed[0].mid()/cos(boatHead))*Interval(0.8,1.2);
     //cout << "modified heading "<< boatHead << endl;
     //cout << "modified speed " << speed << endl;
 }

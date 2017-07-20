@@ -9,7 +9,7 @@ using namespace std;
 
 
 int main(int argc, char** argv){
-    vector<vector<double>> waypoints = {{0,0},{40,50},{-10,70},{-5,120}};
+    vector<vector<double>> waypoints = {{0,0},{40,50},{-10,60},{-5,100},{20,100}};
     vector<Interval> boatSpeed(waypoints.size()-1,Interval(2,2.5));
 
     cout << "before collision avoidance" << endl;
@@ -25,7 +25,7 @@ int main(int argc, char** argv){
 
     vector<IntervalVector> obstacles;
     double pos1[4][2] = {{1.5, 1.7}, {30, 35}, {-10, -8}, {2, 2.1}}; // {speed, posInitx, posInity, heading}
-    double pos2[4][2] = {{3, 3.5}, {10, 12}, {0, 3}, {0.4, 0.5}};
+    double pos2[4][2] = {{3, 3.5}, {10, 12}, {0, 3}, {1.5, 1.6}};
     IntervalVector obs1(4, pos1);
     IntervalVector obs2(4, pos2);
     obstacles.push_back(obs1);
