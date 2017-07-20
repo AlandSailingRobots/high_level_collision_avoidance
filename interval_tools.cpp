@@ -51,7 +51,7 @@ IntervalVector right(const IntervalVector& X){
 
 
 void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>& listBoxes){
-    if (X.max_diam() < 0.2){
+    if (X.max_diam() < 0.3){
         return;
     }
     IntervalVector XinEnd(2);
@@ -123,4 +123,16 @@ bool collisionCondition(Interval v, Interval x0, Interval y0, Interval th, Inter
     else{
         return 0;
     }
+}
+
+IntervalVector findClosest(vector<IntervalVector> listBoxes, IntervalVector boatSpeed){
+    double dist = 1000000000;
+    IntervalVector outputBox(2); 
+    for ( int i = 0; i < listBoxes.size(); i++){
+        if (distance(boatSpeed, listBoxes[i]) < dist){
+            dist = distance(boatSpeed, listBoxes[i]);
+            outputBox = listBoxes[i];
+        }
+    }
+    return outputBox;
 }
