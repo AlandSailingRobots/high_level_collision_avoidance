@@ -36,7 +36,7 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
                 pathReplanning(boatHead, boatSpeed[i-1], boatState, T, obstacles);
                 if (i == waypoints.size() - 1){
                     //cout << "new speed for new waypoint :" << boatSpeed[i-1] << endl;
-                    boatSpeed.push_back(boatSpeed[i-1]);
+                    boatSpeed.push_back(Interval(2,2.5));
                     waypoints.push_back(waypoints[i]);
                     waypoints[i][0] = boatSpeed[i-1].mid()*cos(boatHead)*T.ub() + boatState[0].mid();
                     waypoints[i][1] = boatSpeed[i-1].mid()*sin(boatHead)*T.ub() + boatState[1].mid();

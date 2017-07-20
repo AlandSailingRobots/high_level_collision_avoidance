@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char** argv){
     vector<vector<double>> waypoints = {{0,0},{40,50},{-10,60},{-5,100},{20,100}};
-    vector<Interval> boatSpeed(waypoints.size()-1,Interval(2,2.5));
+    vector<Interval> boatSpeed(waypoints.size()-1, Interval(2,2.5));
 
     cout << "before collision avoidance" << endl;
     cout << "waypoints :" << endl;
