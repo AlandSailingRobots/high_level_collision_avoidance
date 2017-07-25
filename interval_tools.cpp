@@ -5,6 +5,8 @@
 using namespace ibex;
 using namespace std;
 
+/*_____________________________________
+useful functions for bisection of interval and boxes*/
 Interval left(const Interval& x){
     if (x.is_empty()){
         return Interval(Interval::EMPTY_SET);
@@ -48,6 +50,8 @@ IntervalVector right(const IntervalVector& X){
     newX[1] = right(X[1]);       
     return newX;
 }
+//__________________________________________
+
 
 
 void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>& listBoxes){
@@ -111,6 +115,7 @@ void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>&
     paving(left(XinEnd), listSep, listBoxes);
     paving(right(XinEnd), listSep, listBoxes);
 }
+
 
 bool collisionCondition(Interval v, Interval x0, Interval y0, Interval th, Interval vi, Interval xi, Interval yi, Interval thi, Interval t){
     Interval C1, C2, C3;

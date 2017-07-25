@@ -9,7 +9,9 @@ using namespace std;
 
 
 int main(int argc, char** argv){
-    vector<vector<double>> waypoints = {{0,0},{40,50},{-10,60},{-5,100},{20,100}};
+    //coordinate {x,y} of the waypoints
+    vector<vector<double>> waypoints = {{0,0},{40,50},{-10,60},{-5,100},{10,120}};
+    //initial boat speed for each segment
     vector<Interval> boatSpeed(waypoints.size()-1, Interval(2,2.5));
 
     cout << "before collision avoidance" << endl;
@@ -22,7 +24,7 @@ int main(int argc, char** argv){
         cout << boatSpeed[i] << endl;
     }
 
-
+    //informations about obstacles
     vector<IntervalVector> obstacles;
     double pos1[4][2] = {{1.5, 1.7}, {30, 35}, {-10, -8}, {2, 2.1}}; // {speed, posInitx, posInity, heading}
     double pos2[4][2] = {{3, 3.5}, {10, 12}, {0, 3}, {1.5, 1.6}};
@@ -31,10 +33,9 @@ int main(int argc, char** argv){
     obstacles.push_back(obs1);
     obstacles.push_back(obs2);
 
-    IntervalVector boatState(2);
-    boatState[0] = Interval(-1,1);
-    boatState[1] = Interval(-1,1);
-
+    /*initial position of the boat, /!\ it must be somewhere in the segment between the 2 firsts waypoints /!\ */
+    double _boatState[2][2] = {{-1,1}, {-1,1}};
+    IntervalVector boatState(2, _boatState);
 
     functions::manageCollision(waypoints, boatState, boatSpeed, obstacles);
 
