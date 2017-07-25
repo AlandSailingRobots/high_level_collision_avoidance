@@ -130,12 +130,16 @@ bool collisionCondition(Interval v, Interval x0, Interval y0, Interval th, Inter
     }
 }
 
+double midPointDistance(IntervalVector X, IntervalVector Y){
+    return sqrt(pow(X.mid()[0] - Y.mid()[0], 2) + pow(X.mid()[1] - Y.mid()[1], 2));
+}
+
 IntervalVector findClosest(vector<IntervalVector> listBoxes, IntervalVector boatSpeed){
     double dist = 1000000000;
     IntervalVector outputBox(2); 
     for ( int i = 0; i < listBoxes.size(); i++){
-        if (distance(boatSpeed, listBoxes[i]) < dist){
-            dist = distance(boatSpeed, listBoxes[i]);
+        if (midPointDistance(boatSpeed, listBoxes[i]) < dist){
+            dist = midPointDistance(boatSpeed, listBoxes[i]);
             outputBox = listBoxes[i];
         }
     }

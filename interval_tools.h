@@ -14,4 +14,6 @@ void paving(ibex::IntervalVector X, std::vector<ibex::SepInter*> listSep, std::v
 
 bool collisionCondition(ibex::Interval v, ibex::Interval x0, ibex::Interval y0, ibex::Interval th, ibex::Interval vi, ibex::Interval xi, ibex::Interval yi, ibex::Interval thi, ibex::Interval t);
 
+double midPointDistance(ibex::IntervalVector X, ibex::IntervalVector Y);
+
 ibex::IntervalVector findClosest(std::vector<ibex::IntervalVector> listBoxes, ibex::IntervalVector boatSpeed);
