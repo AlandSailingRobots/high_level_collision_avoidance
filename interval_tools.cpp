@@ -156,7 +156,7 @@ void createSepBorder(vector<vector<double>> border, vector <SepInter*> &listSep,
 }
 
 
-bool collisionCondition(Interval v, Interval x0, Interval y0, Interval th, Interval vi, Interval xi, Interval yi, Interval thi, Interval t){
+bool collisionCondition(Interval v, Interval x0, Interval y0, double th, Interval vi, Interval xi, Interval yi, Interval thi, Interval t){
     Interval C1, C2, C3;
     C1 = (v*cos(th)-vi*cos(thi))*t+x0-xi;
     C2 = (v*sin(th)-vi*sin(thi))*t+y0-yi;

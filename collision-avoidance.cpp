@@ -53,7 +53,7 @@ int main(int argc, char** argv){
     //informations about obstacles
     vector<IntervalVector> obstacles;
     double pos1[4][2] = {{1.5, 1.7}, {30, 35}, {-10, -8}, {2, 2.1}}; // {speed, posInitx, posInity, heading}
-    double pos2[4][2] = {{3, 3.5}, {10, 12}, {0, 3}, {1.5, 1.6}};
+    double pos2[4][2] = {{2, 2.5}, {10, 12}, {0, 3}, {1.6, 1.7}};
     IntervalVector obs1(4, pos1);
     IntervalVector obs2(4, pos2);
     obstacles.push_back(obs1);
