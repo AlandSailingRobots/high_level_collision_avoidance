@@ -12,6 +12,8 @@ ibex::IntervalVector right(const ibex::IntervalVector& X);
 
 void paving(ibex::IntervalVector X, std::vector<ibex::SepInter*> listSep, std::vector<ibex::IntervalVector>& listBoxes);
 
+void createSepBorder(std::vector<std::vector<double>> border, std::vector <ibex::SepInter*> &listSep, ibex::IntervalVector boatInitPos, ibex::Interval T);
+
 bool collisionCondition(ibex::Interval v, ibex::Interval x0, ibex::Interval y0, ibex::Interval th, ibex::Interval vi, ibex::Interval xi, ibex::Interval yi, ibex::Interval thi, ibex::Interval t);
 
 double midPointDistance(ibex::IntervalVector X, ibex::IntervalVector Y);

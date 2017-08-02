@@ -7,7 +7,7 @@ using namespace ibex;
 using namespace std;
 
 namespace functions{
-void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState, vector<Interval>& boatSpeed, vector<IntervalVector> obstacles){
+void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState, vector<Interval>& boatSpeed, vector<IntervalVector> obstacles,vector<vector<vector<double>>> borderList){
     double boatHead;
     //assume that the boat heading will be aligned with the 2 waypoints
     boatHead = acos(waypoints[1][0]/(sqrt(pow(waypoints[1][0],2)+pow(waypoints[1][1],2))));
@@ -39,7 +39,8 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
         for (int j = 0; j < obstacles.size(); j++){
             if (collisionCondition(boatSpeed[i-1], boatState[0], boatState[1], boatHead, obstacles[j][0], obstacles[j][1], obstacles[j][2], obstacles[j][3], T)){
                 //in the computation, every obstacles are taken into account, so we won't enter here 2 times, even if there are 2 different obstacles in this segment
-                pathReplanning(boatHead, boatSpeed[i-1], boatState, T, obstacles);
+                
+                pathReplanning(boatHead, boatSpeed[i-1], boatState, T, obstacles, borderList);
 
                 if (i == waypoints.size() - 1){
                     boatSpeed.push_back(Interval(2,2.5));
@@ -56,13 +57,14 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
     }
 }
 
-void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState, Interval T, vector<IntervalVector> obstacles){
+void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState, Interval T, vector<IntervalVector> obstacles, vector<vector<vector<double>>> borderList){
     IntervalVector speedComponents(2);
     speedComponents[0] = speed*cos(boatHead);
     speedComponents[1] = speed*sin(boatHead);
 
-    vibes::beginDrawing();
-    vibes::newFigure("feasible speed");
+    string name = "path replanning heading " + to_string(boatHead);
+    
+    vibes::newFigure(name);
     vibes::setFigureProperties(vibesParams("x", 100, "y", 100, "width", 800, "height", 800));
 
     Variable vx, vy;
@@ -74,6 +76,12 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     SepFwdBwd* pSep2;
     SepFwdBwd* pSep3;
     SepInter* pSep;    
+
+    //compute separators for the borders (exterior borders and islands borders)
+    for (int i = 0; i<borderList.size(); i++){
+        createSepBorder(borderList[i], listSep, boatState, T);
+    }
+
     //build one separator per obstacles, the union is made in the paving method
     for ( int i = 0; i < obstacles.size(); i++){
         pf1 = new Function(vx, vy, (vx - obstacles[i][0]*cos(obstacles[i][3]))*T  +boatState[0] - obstacles[i][1]);
@@ -95,7 +103,7 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
 
     paving(speedInterval, listSep, listBoxes);
 
-    delete pf1, pf2, pf3, pSep1, pSep2, pSep3, pSep, listSep;
+    
 
     vibes::drawBoxes({{speedComponents[0].lb(), speedComponents[0].ub(), speedComponents[1].lb(), speedComponents[1].ub()}}, "[red]");
 

@@ -9,11 +9,16 @@ using namespace std;
 
 
 int main(int argc, char** argv){
+
+    //navigation zone :
+    vector<vector<vector<double>>> borderList = {{{-200, 0}, {-300, 0},{0, 200},{200, 0}, {300, 0}, {0, -200}}, {{-60, 0}, {-60, 50}, {-110, 50}, {-110, 0}}};
+
     //coordinate {x,y} of the waypoints
     vector<vector<double>> waypoints = {{0,0},{40,50},{-10,60},{-5,100},{10,120}};
     //initial boat speed for each segment
     vector<Interval> boatSpeed(waypoints.size()-1, Interval(2,2.5));
 
+    vibes::beginDrawing();
     cout << "before collision avoidance" << endl;
     cout << "waypoints :" << endl;
     for ( int i = 0; i < waypoints.size(); i++){
@@ -22,6 +27,27 @@ int main(int argc, char** argv){
     cout << "speed :" << endl;
     for (int i = 0; i < boatSpeed.size(); i++){
         cout << boatSpeed[i] << endl;
+    }
+
+    vector<double> drawx, drawy;
+
+    for (int i=0; i< waypoints.size(); i++){
+        drawx.push_back(waypoints[i][0]);
+        drawy.push_back(waypoints[i][1]);
+    }
+    vibes::newFigure("path");
+    vibes::setFigureProperties(vibesParams("x", 100, "y", 100, "width", 800, "height", 800));
+    vibes::drawLine(drawx, drawy, "yellow");
+
+    
+    for (int i=0; i<borderList.size(); i++){
+        drawx.resize(0);
+        drawy.resize(0);
+        for (int j=0; j<=borderList[i].size(); j++){
+            drawx.push_back(borderList[i][j%borderList[i].size()][0]);
+            drawy.push_back(borderList[i][j%borderList[i].size()][1]);
+        }
+        vibes::drawLine(drawx, drawy, "red");
     }
 
     //informations about obstacles
@@ -37,7 +63,7 @@ int main(int argc, char** argv){
     double _boatState[2][2] = {{-1,1}, {-1,1}};
     IntervalVector boatState(2, _boatState);
 
-    functions::manageCollision(waypoints, boatState, boatSpeed, obstacles);
+    functions::manageCollision(waypoints, boatState, boatSpeed, obstacles, borderList);
 
     cout << "after collision avoidance" << endl;
     cout << "waypoints :" << endl;
@@ -50,6 +76,15 @@ int main(int argc, char** argv){
     for (int i = 0; i< boatSpeed.size(); i++){
         cout << boatSpeed[i] << endl;
     }
+    vibes::selectFigure("path");
+
+    drawx.resize(0);
+    drawy.resize(0);
+    for (int i=0; i< waypoints.size(); i++){
+        drawx.push_back(waypoints[i][0]);
+        drawy.push_back(waypoints[i][1]);
+    }
+    vibes::drawLine(drawx, drawy, "blue");
 
     return 0;
 }
