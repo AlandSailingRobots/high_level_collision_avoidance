@@ -27,7 +27,7 @@ interval_tools.o: interval_tools.h vibes.h interval_tools.cpp
 functions.o: functions.h interval_tools.h vibes.h functions.cpp
 	$(CXX) functions.cpp -c $(CXXFLAGS) $(LIBS)
 
-collision-avoidance.o: functions.h vibes.h interval_tools.h collision-avoidance.cpp
+collision-avoidance.o: functions.h vibes.h interval_tools.h json.hpp collision-avoidance.cpp
 	$(CXX) collision-avoidance.cpp -c $(CXXFLAGS) $(LIBS)
 
 

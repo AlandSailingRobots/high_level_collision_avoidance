@@ -6,7 +6,7 @@ using namespace ibex;
 using namespace std;
 
 /*_____________________________________
-useful functions for bisection of interval and boxes*/
+useful functions for bisection of intervals and boxes*/
 Interval left(const Interval& x){
     if (x.is_empty()){
         return Interval(Interval::EMPTY_SET);
@@ -168,7 +168,11 @@ bool collisionCondition(Interval v, Interval x0, Interval y0, double th, Interva
         return 0;
     }
 }
+/*
+bool crossBroder(Interval v, interval x0, interval y0, double th, Interval t, vector<double> border1, vector<double> border2){
 
+}
+*/
 double midPointDistance(IntervalVector X, IntervalVector Y){
     return sqrt(pow(X.mid()[0] - Y.mid()[0], 2) + pow(X.mid()[1] - Y.mid()[1], 2));
 }

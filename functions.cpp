@@ -9,10 +9,8 @@ using namespace ibex;
 using namespace std;
 
 namespace functions{
-void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState, vector<Interval>& boatSpeed, vector<IntervalVector> obstacles,vector<vector<vector<double>>> borderList){
-    double boatHead;
-    //assume that the boat heading will be aligned with the 2 waypoints
-    boatHead = acos(waypoints[1][0]/(sqrt(pow(waypoints[1][0],2)+pow(waypoints[1][1],2))));
+void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState, vector<Interval>& boatSpeed, vector<IntervalVector> obstacles, vector<vector<vector<double>>> borderList){
+    double boatHead;  
 
     Interval T;
 
@@ -37,7 +35,8 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
         T = Interval(0, (sqrt(pow(waypoints[i][0] - waypoints[i-1][0],2)+pow(waypoints[i][1] - waypoints[i-1][1],2)))/boatSpeed[i-1].mid());
 
         //update the boat heading
-        boatHead = acos((waypoints[i][0] - waypoints[i-1][0])/(sqrt(pow(waypoints[i][0] - waypoints[i-1][0],2)+pow(waypoints[i][1] - waypoints[i-1][1],2))));
+        //assume that the boat heading will be aligned with the 2 waypoints
+        boatHead = atan2(waypoints[i][1] - waypoints[i-1][1], waypoints[i][0] - waypoints[i-1][0]);
         
         //check for each obstacles if there is a collision, if yes, call the pathReplanning method
         for (int j = 0; j < obstacles.size(); j++){
@@ -52,23 +51,25 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
             if (collisionCondition(boatSpeed[i-1], boatState[0], boatState[1], boatHead, obstacles[j][0], obstacles[j][1], obstacles[j][2], obstacles[j][3], T*1.05)){
                 cout << "collision detected in the " << i <<" segment, with obstacles " << j << endl;
                 //in the computation, every obstacles are taken into account, so we won't enter here 2 times, even if there are 2 different obstacles in this segment
-                
                 pathReplanning(boatHead, boatSpeed[i-1], boatState, T*1.05, obstacles, borderList);
+                waypointManagement(boatHead, boatSpeed, boatState, T.ub(), waypoints, i);
 
-
-                if (i == waypoints.size() - 1){
-                    boatSpeed.push_back(Interval(2,2.5));
-                    waypoints.push_back(waypoints[i]);
-                    waypoints[i][0] = boatSpeed[i-1].mid()*cos(boatHead)*T.ub() + boatState[0].mid();
-                    waypoints[i][1] = boatSpeed[i-1].mid()*sin(boatHead)*T.ub() + boatState[1].mid();
-                }
-                else{
-                    waypoints[i][0] = boatSpeed[i-1].mid()*cos(boatHead)*T.ub() + boatState[0].mid();
-                    waypoints[i][1] = boatSpeed[i-1].mid()*sin(boatHead)*T.ub() + boatState[1].mid();
-                }
-                cout << "check collision risk after path replanning : " << collisionCondition(boatSpeed[i-1], boatState[0], boatState[1], boatHead, obstacles[j][0], obstacles[j][1], obstacles[j][2], obstacles[j][3], T) << endl;
+                
             }
         }
+    }
+}
+
+void waypointManagement(double boatHead, vector<Interval>& boatSpeed, IntervalVector boatState, double t, vector<vector<double>>& waypoints, int i){
+    if (i == waypoints.size() - 1){
+        boatSpeed.push_back(Interval(2,2.5));
+        waypoints.push_back(waypoints[i]);
+        waypoints[i][0] = boatSpeed[i-1].mid()*cos(boatHead)*t + boatState[0].mid();
+        waypoints[i][1] = boatSpeed[i-1].mid()*sin(boatHead)*t + boatState[1].mid();
+    }
+    else{
+        waypoints[i][0] = boatSpeed[i-1].mid()*cos(boatHead)*t + boatState[0].mid();
+        waypoints[i][1] = boatSpeed[i-1].mid()*sin(boatHead)*t + boatState[1].mid();
     }
 }
 
@@ -139,6 +140,8 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
         boatHead = atan(newSpeed[1].mid()/newSpeed[0].mid());
     }
 
+    cout << "heading " << boatHead << endl;
+
     //compute the speed interval corresponding to this heading, and allowing the speed to stay inside the speed components box.
     double speedDiam = min(abs((newSpeed[0].ub() - newSpeed[0].lb())/cos(boatHead)), abs((newSpeed[1].ub() - newSpeed[1].lb())/sin(boatHead)));
     speed = Interval((newSpeed.mid()[0]/cos(boatHead)) - speedDiam/2, (newSpeed.mid()[0]/cos(boatHead)) + speedDiam/2);
@@ -147,20 +150,18 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     speedComponents[0] = speed*cos(boatHead);
     speedComponents[1] = speed*sin(boatHead);
     vibes::drawBoxes({{speedComponents[0].lb(), speedComponents[0].ub(), speedComponents[1].lb(), speedComponents[1].ub()}}, "[orange]");
-    
     }
+
 
     void drawTrajectory(vector<vector<double>> waypoints, vector<Interval> boatSpeed, IntervalVector boatState, vector<IntervalVector> obstacles){
         vibes::selectFigure("path");
         vibes::newGroup("trajectories");
         double boatHead;
-        //assume that the boat heading will be aligned with the 2 waypoints
-        boatHead = acos(waypoints[1][0]/(sqrt(pow(waypoints[1][0],2)+pow(waypoints[1][1],2))));
 
         Interval T;
 
         //for each segment of the trajectory 
-        for ( int i = 1; i< waypoints.size(); i++){     
+        for ( int i = 1; i < waypoints.size(); i++){     
             
             if (i != 1){ //not needed at the first iteration, as everything is already initialized
                 //update the initial position of the boat in the current segment
@@ -178,8 +179,9 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
             T = Interval(0, (sqrt(pow(waypoints[i][0] - waypoints[i-1][0],2)+pow(waypoints[i][1] - waypoints[i-1][1],2)))/boatSpeed[i-1].mid());
 
             //update the boat heading
-            boatHead = acos((waypoints[i][0] - waypoints[i-1][0])/(sqrt(pow(waypoints[i][0] - waypoints[i-1][0],2)+pow(waypoints[i][1] - waypoints[i-1][1],2))));
-
+            boatHead = atan2(waypoints[i][1] - waypoints[i-1][1], waypoints[i][0] - waypoints[i-1][0]);
+            cout << "initPos " << boatState << endl;
+            cout << "heading " << boatHead << endl;
             double t = 0;
             double dt = 0.2;
             Interval x, y;
@@ -197,8 +199,6 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
                 vibes::clearGroup("trajectories");
                 t+= dt;
             }
-
         }
     }
-
 }

@@ -1,20 +1,26 @@
 #include "vibes.h"
 #include "ibex.h"
 #include "functions.h"
+#include "json.hpp"
+#include <fstream>
 
 using namespace ibex;
 using namespace std;
+using json = nlohmann::json;
 
 
 
 
 int main(int argc, char** argv){
+    ifstream input("config.json");
+    json config;
+    input >> config;
 
     //navigation zone :
-    vector<vector<vector<double>>> borderList = {{{-200, 0}, {-300, 0},{0, 200},{200, 0}, {300, 0}, {0, -200}}, {{-60, 0}, {-60, 50}, {-110, 50}, {-110, 0}}};
+    vector<vector<vector<double>>> borderList = config["borderList"];
 
     //coordinate {x,y} of the waypoints
-    vector<vector<double>> waypoints = {{0,0},{40,50},{-10,60},{-5,100},{10,120}};
+    vector<vector<double>> waypoints = config["waypoints"];
     //initial boat speed for each segment
     vector<Interval> boatSpeed(waypoints.size()-1, Interval(2,2.5));
 
@@ -51,16 +57,20 @@ int main(int argc, char** argv){
     }
 
     //informations about obstacles
+    IntervalVector obsi(4);
     vector<IntervalVector> obstacles;
-    double pos1[4][2] = {{1.5, 1.7}, {30, 32}, {-10, -8}, {2, 2.1}}; // {speed, posInitx, posInity, heading}
-    double pos2[4][2] = {{2, 2.3}, {10, 12}, {0, 2}, {1.6, 1.7}};
-    IntervalVector obs1(4, pos1);
-    IntervalVector obs2(4, pos2);
-    obstacles.push_back(obs1);
-    obstacles.push_back(obs2);
+    for (int i = 0; i < config["obstaclesInfos"].size(); i++){
+        // {speed, posInitx, posInity, heading}
+        obsi[0] = Interval(config["obstaclesInfos"][i][0][0], config["obstaclesInfos"][i][0][1]);
+        obsi[1] = Interval(config["obstaclesInfos"][i][1][0], config["obstaclesInfos"][i][1][1]);
+        obsi[2] = Interval(config["obstaclesInfos"][i][2][0], config["obstaclesInfos"][i][2][1]);
+        obsi[3] = Interval(config["obstaclesInfos"][i][3][0], config["obstaclesInfos"][i][3][1]);
+        obstacles.push_back(obsi);
+        
+    }
 
-    /*initial position of the boat, /!\ it must be somewhere in the segment between the 2 firsts waypoints /!\ */
-    double _boatState[2][2] = {{-1,1}, {-1,1}};
+    /*initial position of the boat, by default on the 1st waypoint */
+    double _boatState[2][2] = {{waypoints[0][0]-1, waypoints[0][0]+1}, {waypoints[0][1]-1, waypoints[0][1]+1}};
     IntervalVector boatState(2, _boatState);
 
     functions::manageCollision(waypoints, boatState, boatSpeed, obstacles, borderList);
