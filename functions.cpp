@@ -140,8 +140,6 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
         boatHead = atan(newSpeed[1].mid()/newSpeed[0].mid());
     }
 
-    cout << "heading " << boatHead << endl;
-
     //compute the speed interval corresponding to this heading, and allowing the speed to stay inside the speed components box.
     double speedDiam = min(abs((newSpeed[0].ub() - newSpeed[0].lb())/cos(boatHead)), abs((newSpeed[1].ub() - newSpeed[1].lb())/sin(boatHead)));
     speed = Interval((newSpeed.mid()[0]/cos(boatHead)) - speedDiam/2, (newSpeed.mid()[0]/cos(boatHead)) + speedDiam/2);
@@ -180,8 +178,6 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
 
             //update the boat heading
             boatHead = atan2(waypoints[i][1] - waypoints[i-1][1], waypoints[i][0] - waypoints[i-1][0]);
-            cout << "initPos " << boatState << endl;
-            cout << "heading " << boatHead << endl;
             double t = 0;
             double dt = 0.2;
             Interval x, y;
