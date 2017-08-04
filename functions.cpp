@@ -18,7 +18,6 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
 
     //for each segment of the trajectory 
     for ( int i = 1; i< waypoints.size(); i++){     
-        
         if (i != 1){ //not needed at the first iteration, as everything is already initialized
             //update the initial position of the boat in the current segment
             boatState[0] = boatSpeed[i-2]*cos(boatHead)*T.ub() + boatState[0];
@@ -54,22 +53,31 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
                 pathReplanning(boatHead, boatSpeed[i-1], boatState, T*1.05, obstacles, borderList);
                 waypointManagement(boatHead, boatSpeed, boatState, T.ub(), waypoints, i);
 
-                
             }
         }
+        
+        //check for each border if there is a collision
+        for (int j = 0; j < borderList.size(); j++){
+            for (int k = 0; k < (borderList[j]).size(); k++){
+                if (crossBorder(boatSpeed[i-1], boatState[0], boatState[1], boatHead, T.ub(), borderList[j][k], borderList[j][(k+1)%borderList[j].size()])){
+                    pathReplanning(boatHead, boatSpeed[i-1], boatState, T, obstacles, borderList);
+                    waypointManagement(boatHead, boatSpeed, boatState, T.ub(), waypoints, i);
+                }
+            }
+        }      
     }
 }
 
 void waypointManagement(double boatHead, vector<Interval>& boatSpeed, IntervalVector boatState, double t, vector<vector<double>>& waypoints, int i){
-    if (i == waypoints.size() - 1){
+    vector<double> formerWaypts = waypoints[i];
+    IntervalVector finalState(2);
+    waypoints[i][0] = boatSpeed[i-1].mid()*cos(boatHead)*t + boatState[0].mid();
+    waypoints[i][1] = boatSpeed[i-1].mid()*sin(boatHead)*t + boatState[1].mid();
+    finalState[0] = boatSpeed[i-1]*cos(boatHead)*t + boatState[0];
+    finalState[1] = boatSpeed[i-1]*sin(boatHead)*t + boatState[1];
+    if (i == waypoints.size() - 1 and !(finalState[0].contains(formerWaypts[0]) and finalState[1].contains(formerWaypts[1]))){
         boatSpeed.push_back(Interval(2,2.5));
-        waypoints.push_back(waypoints[i]);
-        waypoints[i][0] = boatSpeed[i-1].mid()*cos(boatHead)*t + boatState[0].mid();
-        waypoints[i][1] = boatSpeed[i-1].mid()*sin(boatHead)*t + boatState[1].mid();
-    }
-    else{
-        waypoints[i][0] = boatSpeed[i-1].mid()*cos(boatHead)*t + boatState[0].mid();
-        waypoints[i][1] = boatSpeed[i-1].mid()*sin(boatHead)*t + boatState[1].mid();
+        waypoints.push_back(formerWaypts);
     }
 }
 
@@ -77,6 +85,8 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     IntervalVector speedComponents(2);
     speedComponents[0] = speed*cos(boatHead);
     speedComponents[1] = speed*sin(boatHead);
+    cout << "speed component x " << speedComponents[0] << endl;
+    cout << "speed component y " << speedComponents[1] << endl;
 
     string name = "path replanning from [" + to_string(boatState[0].lb()) + ", " + to_string(boatState[0].ub()) + "], [" + to_string(boatState[1].lb()) + ", " + to_string(boatState[1].ub()) + "]";
     
@@ -179,7 +189,7 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
             //update the boat heading
             boatHead = atan2(waypoints[i][1] - waypoints[i-1][1], waypoints[i][0] - waypoints[i-1][0]);
             double t = 0;
-            double dt = 0.2;
+            double dt = 0.5;
             Interval x, y;
             while ( t<=T.ub()){
                 x = boatSpeed[i-1]*cos(boatHead)*t + boatState[0];
@@ -191,7 +201,7 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
                     vibes::drawBox(x.lb(), x.ub(), y.lb(), y.ub(), "[black]", vibesParams("group", "trajectories"));
                 }
 
-                this_thread::sleep_for(chrono::milliseconds(100));
+                this_thread::sleep_for(chrono::milliseconds(50));
                 vibes::clearGroup("trajectories");
                 t+= dt;
             }
