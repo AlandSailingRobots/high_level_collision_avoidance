@@ -57,7 +57,7 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
 
             }
         }
-        
+
         //check for each border if there is a collision
         for (int j = 0; j < borderList.size(); j++){
             for (int k = 0; k < (borderList[j]).size(); k++){

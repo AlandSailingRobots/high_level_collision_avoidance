@@ -93,7 +93,7 @@ void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>&
 
     for ( int i = 0; i < size; i++){
         newBox = ListComplementary[i]&X;
-        if (newBox.volume() > 1e-15){
+        if ( !newBox.is_empty() and newBox.volume() > 1e-15){
             listBoxes.push_back(newBox);
             vibes::drawBoxes({{newBox[0].lb(), newBox[0].ub(), newBox[1].lb(), newBox[1].ub()}}, "[cyan]");
         }
@@ -134,15 +134,15 @@ void createSepBorder(vector<vector<double>> border, vector <SepInter*> &listSep,
                                                     (border[(i+1)%border.size()][1] - border[i][1])*(border[i][0] - (vx*T.ub() + boatInitPos[0])))
                                                     );
         
-        pf3 = new Function(vx, vy, max(abs(max(border[i][0], border[(i+1)%border.size()][0]) - max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub())), sqrt(sqr(min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()) - min(border[i][0], border[(i+1)%border.size()][0])))) -
-                                                    max(max(border[i][0], border[(i+1)%border.size()][0]) - min(border[i][0], border[(i+1)%border.size()][0]), max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub()) - min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()))
+        pf3 = new Function(vx, vy, ibex::max(abs(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub())), sqrt(sqr(ibex::min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()) - ibex::min(border[i][0], border[(i+1)%border.size()][0])))) -
+                                                    ibex::max(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::min(border[i][0], border[(i+1)%border.size()][0]), ibex::max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub()) - ibex::min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()))
                                                     );
 
-        pf4 = new Function(vx, vy, max(abs(max(border[i][1], border[(i+1)%border.size()][1]) - max(boatInitPos[1].ub(), vy*T.ub() + boatInitPos[1].ub())), sqrt(sqr(min(boatInitPos[1].lb(), vy*T.ub() + boatInitPos[1].lb()) - min(border[i][1], border[(i+1)%border.size()][1])))) -
-                                                    max(max(border[i][1], border[(i+1)%border.size()][1]) - min(border[i][1], border[(i+1)%border.size()][1]), max(boatInitPos[1].ub(), vy*T.ub() + boatInitPos[1].ub()) - min(boatInitPos[1].lb(), vy*T.ub() + boatInitPos[1].lb()))
+        pf4 = new Function(vx, vy, ibex::max(abs(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - ibex::max(boatInitPos[1].ub(), vy*T.ub() + boatInitPos[1].ub())), sqrt(sqr(ibex::min(boatInitPos[1].lb(), vy*T.ub() + boatInitPos[1].lb()) - ibex::min(border[i][1], border[(i+1)%border.size()][1])))) -
+                                                    ibex::max(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - ibex::min(border[i][1], border[(i+1)%border.size()][1]), ibex::max(boatInitPos[1].ub(), vy*T.ub() + boatInitPos[1].ub()) - ibex::min(boatInitPos[1].lb(), vy*T.ub() + boatInitPos[1].lb()))
                                                     );
         
-
+        
         pSep1 = new SepFwdBwd(*pf1, LEQ);
         pSep2 = new SepFwdBwd(*pf2, LEQ);
         
@@ -171,7 +171,11 @@ bool collisionCondition(Interval v, Interval x0, Interval y0, double th, Interva
 
 bool crossBorder(Interval v, Interval x0, Interval y0, double th, double t, vector<double> border1, vector<double> border2){
     Interval C1, C2;
+    IntervalVector C3(2);
+    /*
     double C3, C4;
+    */
+
     C1 = ((border1[0] - (v*cos(th)*t + x0))*(border1[1] - y0) - 
             (border1[1] - (v*sin(th)*t + y0))*(border1[0] - x0))*
             ((border2[0] - (v*cos(th)*t + x0))*(border2[1] - y0) - 
@@ -181,14 +185,28 @@ bool crossBorder(Interval v, Interval x0, Interval y0, double th, double t, vect
             (border2[1] - border1[1])*(border1[0] - x0))*
             ((border2[0] - border1[0])*(border1[1] - (v*sin(th)*t + y0)) - 
             (border2[1] - border1[1])*(border1[0] - (v*cos(th)*t + x0)));
-    
+    /*
     C3 = max(abs(max(border1[0], border2[0]) - max(x0.ub(), (v*cos(th)*t + x0).ub())), abs(min(x0.lb(), (v*cos(th)*t + x0).lb()) - min(border1[0], border2[0]))) -
                                                     max(max(border1[0], border2[0]) - min(border1[0], border2[0]), max(x0.ub(), (v*cos(th)*t + x0).ub()) - min(x0.lb(), (v*cos(th)*t + x0).lb()));
     
     C4 = max(abs(max(border1[1], border2[1]) - max(y0.ub(), (v*sin(th)*t + y0).ub())), abs(min(y0.lb(), (v*sin(th)*t + y0).lb()) - min(border1[1], border2[1]))) -
                                                     max(max(border1[1], border2[1]) - min(border1[1], border2[1]), max(y0.ub(), (v*sin(th)*t + y0).ub()) - min(y0.lb(), (v*sin(th)*t + y0).lb()));
-                                             
-    if (C1.overlaps(Interval::NEG_REALS) and C2.overlaps(Interval::NEG_REALS) and C3 <= 0 and C4 <= 0){
+      */
+    IntervalVector boatInitPos(2);
+    IntervalVector finalPos(2);
+    IntervalVector borderBox1(2);
+    IntervalVector borderBox2(2);
+    borderBox1[0] = Interval(border1[0]);
+    borderBox1[1] = Interval(border1[1]);
+    borderBox2[0] = Interval(border2[0]);
+    borderBox2[1] = Interval(border2[1]);
+    boatInitPos[0] = x0;
+    boatInitPos[1] = y0;
+    finalPos[0] = v*cos(th)*t + x0;
+    finalPos[1] = v*sin(th)*t + y0;
+    C3 = (borderBox1 | borderBox2) & (boatInitPos | finalPos);
+
+    if (C1.overlaps(Interval::NEG_REALS) and C2.overlaps(Interval::NEG_REALS) and !C3.is_empty()/*and C3 <= 0 and C4 <= 0*/){
         return 1;
     }
     else{
