@@ -133,7 +133,7 @@ void createSepBorder(vector<vector<double>> border, vector <SepInter*> &listSep,
                                                     ((border[(i+1)%border.size()][0] - border[i][0])*(border[i][1] - (vy*T.ub() + boatInitPos[1])) - 
                                                     (border[(i+1)%border.size()][1] - border[i][1])*(border[i][0] - (vx*T.ub() + boatInitPos[0])))
                                                     );
-        // seem to work, but not sure about that
+        // seems to work, but not sure about that
         pf3 = new Function(vx, vy, ibex::max(abs(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub())), sqrt(sqr(ibex::min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()) - ibex::min(border[i][0], border[(i+1)%border.size()][0])))) -
                                                     ibex::max(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::min(border[i][0], border[(i+1)%border.size()][0]), ibex::max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub()) - ibex::min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()))
                                                     );
