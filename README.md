@@ -13,7 +13,7 @@ You can specify the sailing zone, the number and the trajectory of the other boa
 [...]
 ]
 
-If you want no border : just put an empty vector []
+If you doesn't want any border : just put an empty vector []
 
 ### waypoints :
 [[coordinates of the 1st waypoint],... [coordinates of the last waypoint]]
