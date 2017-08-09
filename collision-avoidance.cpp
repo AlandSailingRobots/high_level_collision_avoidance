@@ -60,7 +60,6 @@ int main(int argc, char** argv){
     IntervalVector obsi(4);
     vector<IntervalVector> obstacles;
     for (int i = 0; i < config["obstaclesInfos"].size(); i++){
-        // {speed, posInitx, posInity, heading}
         obsi[0] = Interval(config["obstaclesInfos"][i][0][0], config["obstaclesInfos"][i][0][1]);
         obsi[1] = Interval(config["obstaclesInfos"][i][1][0], config["obstaclesInfos"][i][1][1]);
         obsi[2] = Interval(config["obstaclesInfos"][i][2][0], config["obstaclesInfos"][i][2][1]);

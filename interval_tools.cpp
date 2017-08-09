@@ -79,7 +79,7 @@ void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>&
 
     XoutEnd = listXout[0];
     XinEnd = listXin[0];
-    
+    //compute the union of separators
     for (int i = 1; i < listXout.size(); i++ ){
         XoutEnd = XoutEnd | listXout[i];
         XinEnd = XinEnd & listXin[i];
