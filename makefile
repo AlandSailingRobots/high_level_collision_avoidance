@@ -18,7 +18,7 @@ collision-avoidance: collision-avoidance.o functions.o interval_tools.o vibes.o
 	$(CXX) $^ -o collision-avoidance $(CXXFLAGS) $(LIBS)
 
 
-vibes.o: vibes.h	 vibes.cpp
+vibes.o: vibes.h vibes.cpp
 	$(CXX) vibes.cpp -c $(CXXFLAGS) $(LIBS)
 
 interval_tools.o: interval_tools.h vibes.h interval_tools.cpp
