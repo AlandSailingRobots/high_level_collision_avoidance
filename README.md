@@ -1,6 +1,6 @@
 input format in the json file :
 
-border list :\n
+border list :
 [[[coordinates of the 1st point of the 1st border],... [coordinates of the last point of the 1st border]],
 [[coordinates of the 1st point of the 2nd border],... [coordinates of the last point of the 2nd border]]
 [...]
