@@ -39,8 +39,12 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
         //assume that the boat heading will be aligned with the 2 waypoints
         boatHead = atan2(waypoints[i][1] - waypoints[i-1][1], waypoints[i][0] - waypoints[i-1][0]);
         
+        bool collisionDetected = 0;
+        int j = 0;
+
         //check for each obstacles if there is a collision, if yes, call the pathReplanning method
-        for (int j = 0; j < obstacles.size(); j++){
+        while (j < obstacles.size() and collisionDetected == 0){
+            //for drawing the trajectory of the obstacles :
             drawx.resize(0);
             drawy.resize(0);
             drawx.push_back(obstacles[j][1].mid());
@@ -49,24 +53,31 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
             drawy.push_back((obstacles[j][0]*sin(obstacles[j][3])*T.ub() + obstacles[j][2]).mid());
             vibes::selectFigure("path");
             vibes::drawLine(drawx, drawy, "black");
+
             if (collisionCondition(boatSpeed[i-1], boatState[0], boatState[1], boatHead, obstacles[j][0], obstacles[j][1], obstacles[j][2], obstacles[j][3], T*1.05)){
                 cout << "collision detected in the " << i <<" segment, with obstacles " << j << endl;
-                //in the computation, every obstacles are taken into account, so we won't enter here 2 times, even if there are 2 different obstacles in this segment
                 pathReplanning(boatHead, boatSpeed[i-1], boatState, T*1.05, obstacles, borderList);
                 waypointManagement(boatHead, boatSpeed, boatState, T.ub(), waypoints, i);
+                collisionDetected = 1;
 
             }
+            j++;
         }
 
+        j = 0;
         //check for each border if there is a collision
-        for (int j = 0; j < borderList.size(); j++){
-            for (int k = 0; k < (borderList[j]).size(); k++){
+        while (j < borderList.size() and collisionDetected == 0){
+            int k = 0;
+            while (k < (borderList[j]).size() and collisionDetected == 0){
                 if (crossBorder(boatSpeed[i-1], boatState[0], boatState[1], boatHead, T.ub()*1.05, borderList[j][k], borderList[j][(k+1)%borderList[j].size()])){
                     cout << "collision detected in the " << i << " segment, with the " << k << " segment of the " << j << " border" << endl;
                     pathReplanning(boatHead, boatSpeed[i-1], boatState, T*1.05, obstacles, borderList);
                     waypointManagement(boatHead, boatSpeed, boatState, T.ub(), waypoints, i);
+                    collisionDetected = 1;
                 }
+                k++;
             }
+            j++;
         }      
     }
 }
