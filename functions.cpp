@@ -53,7 +53,7 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
             drawy.push_back((obstacles[j][0]*sin(obstacles[j][3])*T.ub() + obstacles[j][2]).mid());
             vibes::selectFigure("path");
             vibes::drawLine(drawx, drawy, "black");
-
+            // T*1.05 avoid to choose a route and a speed wich will lead to a waypoint very close to a collision
             if (collisionCondition(boatSpeed[i-1], boatState[0], boatState[1], boatHead, obstacles[j][0], obstacles[j][1], obstacles[j][2], obstacles[j][3], T*1.05)){
                 cout << "collision detected in the " << i <<" segment, with obstacles " << j << endl;
                 pathReplanning(boatHead, boatSpeed[i-1], boatState, T*1.05, obstacles, borderList);
