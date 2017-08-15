@@ -28,7 +28,7 @@ If you doesn't want any other boats : just put an empty vector []
 
 ## Outputs of the algorithm
 
-This algorithm outputs a drawing of the trajectory of the boat and of the other boats. The route before collision avoidance is displayed in yellow, after collision avoidance in blue. The sailing zone borders are displayed in red. The route of the other boats are displayed in black.
+This algorithm outputs a drawing of the trajectory of the boat and of the other boats. The route before collision avoidance is displayed in yellow, after collision avoidance in blue. The sailing zone borders are displayed in red. The route of the other boats are displayed in black.  
 The blue box represent the uncertainty on the width of the channel and the uncertainty on the boat progression in this channel.
-The black boxes represent the uncertainty on the other boats positions.
+The black boxes represent the uncertainty on the other boats positions.   
 For each segment of the trajectory where there is a collision, the algorithm outputs a paving of the feasible speed (seen as a vector of coordinate (vx, vy)) of the boat. The speeds which lead to a collision with another boat or with the borders of the sailing zone are displayed in red and yellow. In blue are displayed the speeds which avoid collisions. In blue you can see the initial speed of the boat, before collision avoidance, and in green th feasible speed chosen by the algorithm.
