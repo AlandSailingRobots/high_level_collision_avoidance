@@ -1,11 +1,11 @@
-# collision avoidance algorithm
+# Collision avoidance algorithm
 
 ## Introduction
 
 The goal of this algorithm is to check if there is any collision with another boat or with the border of the sailing zone in the current route, represented by a list of waypoints.
 You can specify the sailing zone, the number and the trajectory of the other boat, and the waypoints list in a JSON file “config.json”.
 
-## input format in the json file :
+## Input format in the json file
 
 ### border list :
 [[[coordinates of the 1st point of the 1st border],... [coordinates of the last point of the 1st border]],
@@ -25,3 +25,13 @@ If you doesn't want any border : just put an empty vector []
 ]
 
 If you doesn't want any other boats : just put an empty vector []
+
+## Outputs of the algorithm
+
+This algorithm outputs a drawing of the trajectory of the boat and of the other boats. The route before collision avoidance is displayed in yellow, after collision avoidance in blue. The sailing zone borders are displayed in red. The route of the other boats are displayed in black.
+
+The blue box represent the uncertainty on the width of the channel and the uncertainty on the boat progression in this channel.
+The black boxes represent the uncertainty on the other boats positions.
+
+For each segment of the trajectory where there is a collision, the algorithm outputs a paving of the feasible speed (seen as a vector of coordinate (vx, vy)) of the boat. The speeds which lead to a collision with another boat or with the borders of the sailing zone are displayed in red and yellow. In blue are displayed the speeds which avoid collisions. In blue you can see the initial speed of the boat, before collision avoidance, and in green th feasible speed chosen by the algorithm.
+
