@@ -35,7 +35,7 @@ The black boxes represent the uncertainty on the other boats positions.
 
 For each segment of the trajectory where there is a collision, the algorithm outputs a paving of the feasible speed (seen as a vector of coordinate (vx, vy)) of the boat. The speeds which lead to a collision with another boat or with the borders of the sailing zone are displayed in red and yellow. In blue are displayed the speeds which avoid collisions. In blue you can see the initial speed of the boat, before collision avoidance, and in green th feasible speed chosen by the algorithm.
 
-## Other informations
+## Other information
 
 if you would like more information, please read the document below (the part entilted deliberative collision avoidance algorithm) :
 [description document](https://docs.google.com/a/uas.ax/document/d/1QUy6AdNvMZuc0FNC6rVeGaShAturBskqho5N7traBUM/edit?usp=sharing)
