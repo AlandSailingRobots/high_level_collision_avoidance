@@ -5,6 +5,12 @@
 The goal of this algorithm is to check if there is any collision with another boat or with the border of the sailing zone in the current route, represented by a list of waypoints.
 You can specify the sailing zone, the number and the trajectory of the other boat, and the waypoints list in a JSON file “config.json”.
 
+## prerequisit
+
+In order to display the outputs of the algorithm, you will need to install the following application :
+[VIBes viewer](http://enstabretagnerobotics.github.io/VIBES/)
+you will need to run vibes-viewer before running this code.
+
 ## Input format in the json file
 
 ### border list :
