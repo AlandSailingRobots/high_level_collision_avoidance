@@ -5,6 +5,15 @@
 The goal of this algorithm is to check if there is any collision with another boat or with the border of the sailing zone in the current route, represented by a list of waypoints.
 You can specify the sailing zone, the number and the trajectory of the other boat, and the waypoints list in a JSON file “config.json”.
 
+## prerequisite
+
+In order to display the outputs of the algorithm, you will need to install the following application :
+[VIBes viewer](http://enstabretagnerobotics.github.io/VIBES/)
+you will need to run vibes-viewer before running this code.
+
+If you want to compile this code, you will need to install the following library : ibex 2.3.4
+[ibex download page](http://www.ibex-lib.org/download) (watch out for the version of the library, the code was written with the 2.3.4 version)
+
 ## Input format in the json file
 
 ### border list :
@@ -13,7 +22,7 @@ You can specify the sailing zone, the number and the trajectory of the other boa
 [...]
 ]
 
-If you doesn't want any border : just put an empty vector []
+If you don't want any border : just put an empty vector []
 
 ### waypoints :
 [[coordinates of the 1st waypoint],... [coordinates of the last waypoint]]
@@ -24,7 +33,7 @@ If you doesn't want any border : just put an empty vector []
 [...]
 ]
 
-If you doesn't want any other boats : just put an empty vector []
+If you don't want any other boats : just put an empty vector []
 
 ## Outputs of the algorithm
 
