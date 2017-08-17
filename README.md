@@ -22,7 +22,7 @@ If you want to compile this code, you will need to install the following library
 [...]
 ]
 
-If you doesn't want any border : just put an empty vector []
+If you don't want any border : just put an empty vector []
 
 ### waypoints :
 [[coordinates of the 1st waypoint],... [coordinates of the last waypoint]]
@@ -33,7 +33,7 @@ If you doesn't want any border : just put an empty vector []
 [...]
 ]
 
-If you doesn't want any other boats : just put an empty vector []
+If you don't want any other boats : just put an empty vector []
 
 ## Outputs of the algorithm
 
