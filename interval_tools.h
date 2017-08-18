@@ -10,7 +10,7 @@ ibex::IntervalVector left(const ibex::IntervalVector& X);
 
 ibex::IntervalVector right(const ibex::IntervalVector& X);
 
-void paving(ibex::IntervalVector X, std::vector<ibex::SepInter*> listSep, std::vector<ibex::IntervalVector>& listBoxes);
+void paving(ibex::IntervalVector X, std::vector<ibex::SepInter*> listSep, std::vector<ibex::IntervalVector>& listBoxes, double epsilon);
 
 void createSepBorder(std::vector<std::vector<double>> border, std::vector <ibex::SepInter*> &listSep, ibex::IntervalVector boatInitPos, ibex::Interval T);
 

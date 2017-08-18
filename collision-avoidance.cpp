@@ -22,7 +22,7 @@ int main(int argc, char** argv){
     //coordinate {x,y} of the waypoints
     vector<vector<double>> waypoints = config["waypoints"];
     //initial boat speed for each segment
-    vector<Interval> boatSpeed(waypoints.size()-1, Interval(2,2.5));
+    vector<Interval> boatSpeed(waypoints.size()-1, Interval(config["defaultSpeedInterval"][0],config["defaultSpeedInterval"][1]));
 
     vibes::beginDrawing();
     cout << "before collision avoidance" << endl;
@@ -69,8 +69,9 @@ int main(int argc, char** argv){
     }
 
     /*initial position of the boat, by default on the 1st waypoint */
-    double _boatState[2][2] = {{waypoints[0][0]-1, waypoints[0][0]+1}, {waypoints[0][1]-1, waypoints[0][1]+1}};
-    IntervalVector boatState(2, _boatState);
+    double boatInitPosUncertaintySize = config["boatInitPosUncertaintySize"];
+    double boatStateBounds[2][2] = {{waypoints[0][0] - boatInitPosUncertaintySize/2., waypoints[0][0] + boatInitPosUncertaintySize/2.}, {waypoints[0][1] - boatInitPosUncertaintySize/2., waypoints[0][1] + boatInitPosUncertaintySize/2.}};
+    IntervalVector boatState(2, boatStateBounds);
 
     functions::manageCollision(waypoints, boatState, boatSpeed, obstacles, borderList);
 
