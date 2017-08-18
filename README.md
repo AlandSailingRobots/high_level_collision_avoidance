@@ -26,6 +26,12 @@ If you doesn't want any border : just put an empty vector []
 
 If you doesn't want any other boats : just put an empty vector []
 
+### boatInitPosUncertaintySize :
+size of the uncertainty of the initial position of the boat (diameter of the 2 intervals of the box).  
+
+### defaultSpeedInterval :
+[default speed lower bounds, default speed upper bounds]  
+
 ## Outputs of the algorithm
 
 This algorithm outputs a drawing of the trajectory of the boat and of the other boats. The route before collision avoidance is displayed in yellow, after collision avoidance in blue. The sailing zone borders are displayed in red. The route of the other boats are displayed in black.

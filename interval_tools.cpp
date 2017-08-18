@@ -54,11 +54,11 @@ IntervalVector right(const IntervalVector& X){
 
 
 
-void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>& listBoxes){
+void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>& listBoxes, double epsilon){
     if (X.is_empty()){
         return;
     }
-    else if (X.max_diam() < 0.5){
+    else if (X.max_diam() < epsilon){
         return;
     }
     IntervalVector XinEnd(2);
@@ -99,14 +99,15 @@ void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>&
         }
     }
 
+
     vibes::drawBoxes({{XoutEnd[0].lb(), XoutEnd[0].ub(), XoutEnd[1].lb(), XoutEnd[1].ub()}}, "[red]");
 
     maybeBox = XinEnd & XoutEnd;
 
     vibes::drawBoxes({{maybeBox[0].lb(), maybeBox[0].ub(), maybeBox[1].lb(), maybeBox[1].ub()}}, "[yellow]");
 
-    paving(left(maybeBox), listSep, listBoxes);
-    paving(right(maybeBox), listSep, listBoxes);
+    paving(left(maybeBox), listSep, listBoxes, epsilon);
+    paving(right(maybeBox), listSep, listBoxes, epsilon);
 }
 
 void createSepBorder(vector<vector<double>> border, vector <SepInter*> &listSep, IntervalVector boatInitPos, Interval T){
