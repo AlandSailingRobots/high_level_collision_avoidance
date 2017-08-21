@@ -98,30 +98,33 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     vibes::setFigureProperties(vibesParams("x", 800, "y", 0, "width", 800, "height", 800));
 
     Variable vx, vy;
-    vector<SepInter*> listSep;
-    Function* pf1;
-    Function* pf2;
-    Function* pf3;
-    SepFwdBwd* pSep1;
-    SepFwdBwd* pSep2;
-    SepFwdBwd* pSep3;
-    SepInter* pSep;    
+    vector<shared_ptr<SepInter>> listSep;
+
+    vector<shared_ptr<Function>> listFunc;
+    
+    vector<shared_ptr<SepFwdBwd>> listInitialSep;
 
     //compute separators for the borders (exterior borders and islands borders)
     for (int i = 0; i<borderList.size(); i++){
-        createSepBorder(borderList[i], listSep, boatState, timeInterval);
+        createSepBorder(borderList[i], listSep, boatState, timeInterval, listFunc, listInitialSep);
     }
 
     //build one separator per obstacles, the union is made in the paving method
     for ( int i = 0; i < obstacles.size(); i++){
-        pf1 = new Function(vx, vy, (vx - obstacles[i][0]*cos(obstacles[i][3]))*timeInterval  +boatState[0] - obstacles[i][1]);
-        pf2 = new Function(vx, vy, (vy - obstacles[i][0]*sin(obstacles[i][3]))*timeInterval  + boatState[1] - obstacles[i][2]);
-        pf3 = new Function(vx, vy, (vy - obstacles[i][0]*sin(obstacles[i][3]))*(boatState[0] - obstacles[i][1]) - (vx - obstacles[i][0]*cos(obstacles[i][3]))*(boatState[1] - obstacles[i][2]));
+        shared_ptr<Function> pf1 = shared_ptr<Function>(new Function(vx, vy, (vx - obstacles[i][0]*cos(obstacles[i][3]))*timeInterval  +boatState[0] - obstacles[i][1]));
+        listFunc.push_back(pf1);
+        shared_ptr<Function> pf2 = shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[i][0]*sin(obstacles[i][3]))*timeInterval  + boatState[1] - obstacles[i][2]));
+        listFunc.push_back(pf2);
+        shared_ptr<Function> pf3 = shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[i][0]*sin(obstacles[i][3]))*(boatState[0] - obstacles[i][1]) - (vx - obstacles[i][0]*cos(obstacles[i][3]))*(boatState[1] - obstacles[i][2])));
+        listFunc.push_back(pf3);
 
-        pSep1 = new SepFwdBwd(*pf1, Interval(0,0));
-        pSep2 = new SepFwdBwd(*pf2, Interval(0,0));
-        pSep3 = new SepFwdBwd(*pf3, Interval(0,0));
-        pSep = new SepInter(*pSep1, *pSep2, *pSep3);
+        shared_ptr<SepFwdBwd> pSep1 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf1, Interval(0,0)));
+        listInitialSep.push_back(pSep1);
+        shared_ptr<SepFwdBwd> pSep2 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf2, Interval(0,0)));
+        listInitialSep.push_back(pSep2);
+        shared_ptr<SepFwdBwd> pSep3 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf3, Interval(0,0)));
+        listInitialSep.push_back(pSep3);
+        shared_ptr<SepInter> pSep = shared_ptr<SepInter>(new SepInter(*pSep1, *pSep2, *pSep3));
 
         listSep.push_back(pSep);
     }
@@ -132,7 +135,6 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     vector<IntervalVector> listFeasibleSpeedBoxes;
 
     paving(speedInterval, listSep, listFeasibleSpeedBoxes, 0.5);
-
 
     vibes::drawBoxes({{speedComponents[0].lb(), speedComponents[0].ub(), speedComponents[1].lb(), speedComponents[1].ub()}}, "[blue]");
 

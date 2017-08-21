@@ -54,7 +54,7 @@ IntervalVector right(const IntervalVector& X){
 
 
 
-void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>& listBoxes, double epsilon){
+void paving(IntervalVector X, vector<shared_ptr<SepInter>> listSep, vector<IntervalVector>& listBoxes, double epsilon){
     if (X.is_empty()){
         return;
     }
@@ -98,6 +98,7 @@ void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>&
             vibes::drawBoxes({{newBox[0].lb(), newBox[0].ub(), newBox[1].lb(), newBox[1].ub()}}, "[cyan]");
         }
     }
+    delete[] ListComplementary;
 
 
     vibes::drawBoxes({{XoutEnd[0].lb(), XoutEnd[0].ub(), XoutEnd[1].lb(), XoutEnd[1].ub()}}, "[red]");
@@ -110,47 +111,46 @@ void paving(IntervalVector X, vector<SepInter*> listSep, vector<IntervalVector>&
     paving(right(maybeBox), listSep, listBoxes, epsilon);
 }
 
-void createSepBorder(vector<vector<double>> border, vector <SepInter*> &listSep, IntervalVector boatInitPos, Interval T){
+void createSepBorder(vector<vector<double>> border, vector<shared_ptr<SepInter>> &listSep, IntervalVector boatInitPos, Interval T, vector<shared_ptr<Function>> &deleteFunc, vector<shared_ptr<SepFwdBwd>> &deleteInitialSep){
     Variable vx, vy;
-    Function* pf1;
-    Function* pf2;
-    Function* pf3;
-    Function* pf4;
-    SepFwdBwd* pSep1;
-    SepFwdBwd* pSep2;
-    SepFwdBwd* pSep3;
-    SepFwdBwd* pSep4;
-    SepInter* pSep;    
 
     for (int i = 0; i < border.size(); i++){
-        pf1 = new Function(vx, vy, ((border[i][0] - (vx*T.ub() + boatInitPos[0]))*(border[i][1] - boatInitPos[1]) - 
+        shared_ptr<Function> pf1 = shared_ptr<Function>(new Function(vx, vy, ((border[i][0] - (vx*T.ub() + boatInitPos[0]))*(border[i][1] - boatInitPos[1]) - 
                                                     (border[i][1] - (vy*T.ub() + boatInitPos[1]))*(border[i][0] - boatInitPos[0]))*
                                                     ((border[(i+1)%border.size()][0] - (vx*T.ub() + boatInitPos[0]))*(border[(i+1)%border.size()][1] - boatInitPos[1]) - 
                                                     (border[(i+1)%border.size()][1] - (vy*T.ub() + boatInitPos[1]))*(border[(i+1)%border.size()][0] - boatInitPos[0]))
-                                                    );
+                                                    ));
+        deleteFunc.push_back(pf1);
         
-        pf2 = new Function(vx, vy, ((border[(i+1)%border.size()][0] - border[i][0])*(border[i][1] - boatInitPos[1]) - 
+        shared_ptr<Function> pf2 = shared_ptr<Function>(new Function(vx, vy, ((border[(i+1)%border.size()][0] - border[i][0])*(border[i][1] - boatInitPos[1]) - 
                                                     (border[(i+1)%border.size()][1] - border[i][1])*(border[i][0] - boatInitPos[0]))*
                                                     ((border[(i+1)%border.size()][0] - border[i][0])*(border[i][1] - (vy*T.ub() + boatInitPos[1])) - 
                                                     (border[(i+1)%border.size()][1] - border[i][1])*(border[i][0] - (vx*T.ub() + boatInitPos[0])))
-                                                    );
+                                                    ));
+        deleteFunc.push_back(pf2);
         // seems to work, but not sure about that
-        pf3 = new Function(vx, vy, ibex::max(abs(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub())), sqrt(sqr(ibex::min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()) - ibex::min(border[i][0], border[(i+1)%border.size()][0])))) -
+        shared_ptr<Function> pf3 = shared_ptr<Function>(new Function(vx, vy, ibex::max(abs(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub())), sqrt(sqr(ibex::min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()) - ibex::min(border[i][0], border[(i+1)%border.size()][0])))) -
                                                     ibex::max(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::min(border[i][0], border[(i+1)%border.size()][0]), ibex::max(boatInitPos[0].ub(), vx*T.ub() + boatInitPos[0].ub()) - ibex::min(boatInitPos[0].lb(), vx*T.ub() + boatInitPos[0].lb()))
-                                                    );
+                                                    ));
+        deleteFunc.push_back(pf3);
 
-        pf4 = new Function(vx, vy, ibex::max(abs(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - ibex::max(boatInitPos[1].ub(), vy*T.ub() + boatInitPos[1].ub())), sqrt(sqr(ibex::min(boatInitPos[1].lb(), vy*T.ub() + boatInitPos[1].lb()) - ibex::min(border[i][1], border[(i+1)%border.size()][1])))) -
+        shared_ptr<Function> pf4 = shared_ptr<Function>(new Function(vx, vy, ibex::max(abs(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - ibex::max(boatInitPos[1].ub(), vy*T.ub() + boatInitPos[1].ub())), sqrt(sqr(ibex::min(boatInitPos[1].lb(), vy*T.ub() + boatInitPos[1].lb()) - ibex::min(border[i][1], border[(i+1)%border.size()][1])))) -
                                                     ibex::max(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - ibex::min(border[i][1], border[(i+1)%border.size()][1]), ibex::max(boatInitPos[1].ub(), vy*T.ub() + boatInitPos[1].ub()) - ibex::min(boatInitPos[1].lb(), vy*T.ub() + boatInitPos[1].lb()))
-                                                    );
+                                                    ));
+        deleteFunc.push_back(pf4);
         
         
-        pSep1 = new SepFwdBwd(*pf1, LEQ);
-        pSep2 = new SepFwdBwd(*pf2, LEQ);
+        shared_ptr<SepFwdBwd> pSep1 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf1, LEQ));
+        deleteInitialSep.push_back(pSep1);
+        shared_ptr<SepFwdBwd> pSep2 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf2, LEQ));
+        deleteInitialSep.push_back(pSep2);
         
-        pSep3 = new SepFwdBwd(*pf3, LEQ);
-        pSep4 = new SepFwdBwd(*pf4, LEQ);
+        shared_ptr<SepFwdBwd> pSep3 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf3, LEQ));
+        deleteInitialSep.push_back(pSep3);
+        shared_ptr<SepFwdBwd> pSep4 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf4, LEQ));
+        deleteInitialSep.push_back(pSep4);
         
-        pSep = new SepInter(*pSep1, *pSep2, *pSep3, *pSep4);
+        shared_ptr<SepInter> pSep = shared_ptr<SepInter>(new SepInter(*pSep1, *pSep2, *pSep3, *pSep4));
 
         listSep.push_back(pSep);
     }
@@ -220,7 +220,7 @@ double midPointDistance(IntervalVector X, IntervalVector Y){
 }
 
 IntervalVector findClosest(vector<IntervalVector> listBoxes, IntervalVector boatSpeed){
-    double dist = 1000000000;
+    double dist = numeric_limits<double>::max();
     IntervalVector outputBox(2); 
     for ( int i = 0; i < listBoxes.size(); i++){
         if (midPointDistance(boatSpeed, listBoxes[i]) < dist){
