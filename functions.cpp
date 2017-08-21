@@ -49,7 +49,6 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
                 pathReplanning(boatHead, boatSpeed[i-1], boatState, timeInterval*timeSafetyMargin, obstacles, borderList);
                 waypointManagement(boatHead, boatSpeed, boatState, timeInterval.ub(), waypoints, i);
                 collisionDetected = 1;
-
             }
             j++;
         }
@@ -72,14 +71,17 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
     }
 }
 
-void waypointManagement(double boatHead, vector<Interval>& boatSpeed, IntervalVector boatState, double endTime, vector<vector<double>>& waypoints, int currentSegmentIndice){
-    vector<double> formerWaypts = waypoints[currentSegmentIndice];
+void waypointManagement(double boatHead, vector<Interval>& boatSpeed, IntervalVector boatState, double endTime, vector<vector<double>>& waypoints, int currentSegmentIndex){
+    vector<double> formerWaypts = waypoints[currentSegmentIndex];
     IntervalVector finalState(2);
-    waypoints[currentSegmentIndice][0] = boatSpeed[currentSegmentIndice-1].mid()*cos(boatHead)*endTime + boatState[0].mid();
-    waypoints[currentSegmentIndice][1] = boatSpeed[currentSegmentIndice-1].mid()*sin(boatHead)*endTime + boatState[1].mid();
-    finalState[0] = boatSpeed[currentSegmentIndice-1]*cos(boatHead)*endTime + boatState[0];
-    finalState[1] = boatSpeed[currentSegmentIndice-1]*sin(boatHead)*endTime + boatState[1];
-    if (currentSegmentIndice == waypoints.size() - 1 and !(finalState[0].contains(formerWaypts[0]) and finalState[1].contains(formerWaypts[1]))){
+
+    waypoints[currentSegmentIndex][0] = boatSpeed[currentSegmentIndex-1].mid()*cos(boatHead)*endTime + boatState[0].mid();
+    waypoints[currentSegmentIndex][1] = boatSpeed[currentSegmentIndex-1].mid()*sin(boatHead)*endTime + boatState[1].mid();
+
+    finalState[0] = boatSpeed[currentSegmentIndex-1]*cos(boatHead)*endTime + boatState[0];
+    finalState[1] = boatSpeed[currentSegmentIndex-1]*sin(boatHead)*endTime + boatState[1];
+
+    if (currentSegmentIndex == waypoints.size() - 1 and !(finalState[0].contains(formerWaypts[0]) and finalState[1].contains(formerWaypts[1]))){
         boatSpeed.push_back(Interval(2,2.5));
         waypoints.push_back(formerWaypts);
     }
@@ -97,45 +99,30 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     vibes::newFigure(name);
     vibes::setFigureProperties(vibesParams("x", 800, "y", 0, "width", 800, "height", 800));
 
-    Variable vx, vy;
     vector<shared_ptr<SepInter>> listSep;
 
     vector<shared_ptr<Function>> listFunc;
     
     vector<shared_ptr<SepFwdBwd>> listInitialSep;
 
-    //compute separators for the borders (exterior borders and islands borders)
+    //compute separators for the borders (exterior borders and islands borders), the union is in the paving method
     for (int i = 0; i<borderList.size(); i++){
         createSepBorder(borderList[i], listSep, boatState, timeInterval, listFunc, listInitialSep);
     }
 
     //build one separator per obstacles, the union is made in the paving method
     for ( int i = 0; i < obstacles.size(); i++){
-        shared_ptr<Function> pf1 = shared_ptr<Function>(new Function(vx, vy, (vx - obstacles[i][0]*cos(obstacles[i][3]))*timeInterval  +boatState[0] - obstacles[i][1]));
-        listFunc.push_back(pf1);
-        shared_ptr<Function> pf2 = shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[i][0]*sin(obstacles[i][3]))*timeInterval  + boatState[1] - obstacles[i][2]));
-        listFunc.push_back(pf2);
-        shared_ptr<Function> pf3 = shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[i][0]*sin(obstacles[i][3]))*(boatState[0] - obstacles[i][1]) - (vx - obstacles[i][0]*cos(obstacles[i][3]))*(boatState[1] - obstacles[i][2])));
-        listFunc.push_back(pf3);
-
-        shared_ptr<SepFwdBwd> pSep1 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf1, Interval(0,0)));
-        listInitialSep.push_back(pSep1);
-        shared_ptr<SepFwdBwd> pSep2 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf2, Interval(0,0)));
-        listInitialSep.push_back(pSep2);
-        shared_ptr<SepFwdBwd> pSep3 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf3, Interval(0,0)));
-        listInitialSep.push_back(pSep3);
-        shared_ptr<SepInter> pSep = shared_ptr<SepInter>(new SepInter(*pSep1, *pSep2, *pSep3));
-
-        listSep.push_back(pSep);
+        createSepObstacle(obstacles[i], listSep, boatState, timeInterval, listFunc, listInitialSep);
     }
 
-    double speedIntervalBounds[2][2] = {{-10,10},{-10,10}};
+    double speedIntervalBounds[2][2] = {{-5,5},{-5,5}};
     IntervalVector speedInterval(2, speedIntervalBounds);
 
     vector<IntervalVector> listFeasibleSpeedBoxes;
 
     paving(speedInterval, listSep, listFeasibleSpeedBoxes, 0.5);
 
+    // display speed box before path replanning
     vibes::drawBoxes({{speedComponents[0].lb(), speedComponents[0].ub(), speedComponents[1].lb(), speedComponents[1].ub()}}, "[blue]");
 
     IntervalVector newSpeed = findClosest(listFeasibleSpeedBoxes, speedComponents);
@@ -170,7 +157,6 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
             return atan(YspeedComponent.mid()/XspeedComponent.mid());
         }
     }
-
 
     void drawTrajectory(vector<vector<double>> waypoints, vector<Interval> boatSpeed, IntervalVector boatState, vector<IntervalVector> obstacles){
         vector<double> drawx, drawy;
@@ -211,6 +197,7 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
 
             //update the boat heading
             boatHead = atan2(waypoints[i][1] - waypoints[i-1][1], waypoints[i][0] - waypoints[i-1][0]);
+            
             double t = 0;
             double dt = 0.5;
             Interval x, y;
