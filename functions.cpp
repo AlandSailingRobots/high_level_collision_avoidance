@@ -17,27 +17,9 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
     Interval timeInterval;
 
     //for each segment of the trajectory 
-    for ( int i = 1; i< waypoints.size(); i++){     
-        if (i != 1){ //not needed at the first iteration, as everything is already initialized
-            //update the initial position of the boat in the current segment
-            
-            boatState[0] = boatSpeed[i-2]*cos(boatHead)*timeInterval.ub() + boatState[0];
-            boatState[1] = boatSpeed[i-2]*sin(boatHead)*timeInterval.ub() + boatState[1];
-            
-            //update the initial position of the obstacle in the current segment
-            for (int j = 0; j < obstacles.size(); j++){
-                obstacles[j][1] = obstacles[j][0]*cos(obstacles[j][3])*timeInterval.ub() + obstacles[j][1];
-                obstacles[j][2] = obstacles[j][0]*sin(obstacles[j][3])*timeInterval.ub() + obstacles[j][2];
-            }
-        }          
+    for ( int i = 1; i< waypoints.size(); i++){  
+        updateBoatAndObstaclesData(waypoints, boatState, boatSpeed, timeInterval, boatHead, obstacles, i);
 
-        //update the duration of the current segment
-        timeInterval = Interval(0, (sqrt(pow(waypoints[i][0] - waypoints[i-1][0],2)+pow(waypoints[i][1] - waypoints[i-1][1],2)))/boatSpeed[i-1].mid());
-
-        //update the boat heading
-        //assume that the boat heading will be aligned with the 2 waypoints
-        boatHead = atan2(waypoints[i][1] - waypoints[i-1][1], waypoints[i][0] - waypoints[i-1][0]);
-        
         bool collisionDetected = 0;
         int j = 0;
 
@@ -69,6 +51,27 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
             j++;
         }      
     }
+}
+
+void updateBoatAndObstaclesData(vector<vector<double>> waypoints, IntervalVector &boatState, vector<Interval> boatSpeed, Interval &timeInterval, double &boatHead, vector<IntervalVector> &obstacles, int currentSegmentIndex){
+    if (currentSegmentIndex != 1){ //not needed at the first iteration, as everything is already initialized
+        //update the initial position of the boat in the current segment
+        
+        boatState[0] = boatSpeed[currentSegmentIndex-2]*cos(boatHead)*timeInterval.ub() + boatState[0];
+        boatState[1] = boatSpeed[currentSegmentIndex-2]*sin(boatHead)*timeInterval.ub() + boatState[1];
+        
+        //update the initial position of the obstacle in the current segment
+        for (int j = 0; j < obstacles.size(); j++){
+            obstacles[j][1] = obstacles[j][0]*cos(obstacles[j][3])*timeInterval.ub() + obstacles[j][1];
+            obstacles[j][2] = obstacles[j][0]*sin(obstacles[j][3])*timeInterval.ub() + obstacles[j][2];
+        }
+    }          
+    //update the duration of the current segment
+    timeInterval = Interval(0, (sqrt(pow(waypoints[currentSegmentIndex][0] - waypoints[currentSegmentIndex-1][0],2)+pow(waypoints[currentSegmentIndex][1] - waypoints[currentSegmentIndex-1][1],2)))/boatSpeed[currentSegmentIndex-1].mid());
+
+    //update the boat heading
+    //assume that the boat heading will be aligned with the 2 waypoints
+    boatHead = atan2(waypoints[currentSegmentIndex][1] - waypoints[currentSegmentIndex-1][1], waypoints[currentSegmentIndex][0] - waypoints[currentSegmentIndex-1][0]);
 }
 
 void waypointManagement(double boatHead, vector<Interval>& boatSpeed, IntervalVector boatState, double endTime, vector<vector<double>>& waypoints, int currentSegmentIndex){
@@ -143,78 +146,107 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     vibes::drawBoxes({{speedComponents[0].lb(), speedComponents[0].ub(), speedComponents[1].lb(), speedComponents[1].ub()}}, "[]");
     }
 
-    double computeHeading(Interval XspeedComponent, Interval YspeedComponent){
-        if (XspeedComponent.mid()>= 0 && YspeedComponent.mid() >= 0){
-            return atan(YspeedComponent.mid()/XspeedComponent.mid());
-        }
-        else if (XspeedComponent.mid() < 0 && YspeedComponent.mid() >= 0 ){
-            return M_PI + atan(YspeedComponent.mid()/XspeedComponent.mid());
-        }
-        else if (XspeedComponent.mid() < 0 && YspeedComponent.mid() < 0){
-            return -M_PI + atan(YspeedComponent.mid()/XspeedComponent.mid());
-        }
-        else if (XspeedComponent.mid() >= 0 && YspeedComponent.mid() < 0){
-            return atan(YspeedComponent.mid()/XspeedComponent.mid());
-        }
+double computeHeading(Interval XspeedComponent, Interval YspeedComponent){
+    if (XspeedComponent.mid()>= 0 && YspeedComponent.mid() >= 0){
+        return atan(YspeedComponent.mid()/XspeedComponent.mid());
     }
+    else if (XspeedComponent.mid() < 0 && YspeedComponent.mid() >= 0 ){
+        return M_PI + atan(YspeedComponent.mid()/XspeedComponent.mid());
+    }
+    else if (XspeedComponent.mid() < 0 && YspeedComponent.mid() < 0){
+        return -M_PI + atan(YspeedComponent.mid()/XspeedComponent.mid());
+    }
+    else if (XspeedComponent.mid() >= 0 && YspeedComponent.mid() < 0){
+        return atan(YspeedComponent.mid()/XspeedComponent.mid());
+    }
+}
 
-    void drawTrajectory(vector<vector<double>> waypoints, vector<Interval> boatSpeed, IntervalVector boatState, vector<IntervalVector> obstacles){
-        vector<double> drawx, drawy;
-        vibes::selectFigure("path");
-        vibes::newGroup("trajectories");
-        double boatHead;
+void drawTrajectory(vector<vector<double>> formerWpts, vector<vector<double>> waypoints, vector<Interval> boatSpeed, IntervalVector boatState, vector<IntervalVector> obstacles, vector<vector<vector<double>>> borderList){
+    vector<double> drawx, drawy;
+    vibes::newFigure("path");
+    vibes::setFigureProperties(vibesParams("x",0 , "y", 0, "width", 800, "height", 800));
+    vibes::newGroup("trajectories");
 
-        Interval timeInterval;
+    drawPath(formerWpts, waypoints, boatSpeed, boatState, obstacles, borderList);
 
-        //for each segment of the trajectory 
-        for ( int i = 1; i < waypoints.size(); i++){     
-            
-            if (i != 1){ //not needed at the first iteration, as everything is already initialized
-                //update the initial position of the boat in the current segment
-                boatState[0] = boatSpeed[i-2]*cos(boatHead)*timeInterval.ub() + boatState[0];
-                boatState[1] = boatSpeed[i-2]*sin(boatHead)*timeInterval.ub() + boatState[1];
-                
-                //update the initial position of the obstacle in the current segment
-                for (int j = 0; j < obstacles.size(); j++){
-                    obstacles[j][1] = obstacles[j][0]*cos(obstacles[j][3])*timeInterval.ub() + obstacles[j][1];
-                    obstacles[j][2] = obstacles[j][0]*sin(obstacles[j][3])*timeInterval.ub() + obstacles[j][2];
-                }
-            }        
+    double boatHead;
 
-            //update the duration of the current segment
-            timeInterval = Interval(0, (sqrt(pow(waypoints[i][0] - waypoints[i-1][0],2)+pow(waypoints[i][1] - waypoints[i-1][1],2)))/boatSpeed[i-1].mid());
+    Interval timeInterval;
 
-            for (int j = 0; j < obstacles.size(); j++){
-                //for drawing the trajectory of the obstacles :
-                drawx.resize(0);
-                drawy.resize(0);
-                drawx.push_back(obstacles[j][1].mid());
-                drawy.push_back(obstacles[j][2].mid());
-                drawx.push_back((obstacles[j][0]*cos(obstacles[j][3])*timeInterval.ub() + obstacles[j][1]).mid());
-                drawy.push_back((obstacles[j][0]*sin(obstacles[j][3])*timeInterval.ub() + obstacles[j][2]).mid());
-                vibes::drawLine(drawx, drawy, "black");
+    //for each segment of the trajectory 
+    for ( int i = 1; i < waypoints.size(); i++){     
+        
+        updateBoatAndObstaclesData(waypoints, boatState, boatSpeed, timeInterval, boatHead, obstacles, i);
+
+        double t = 0;
+        double dt = 0.5;
+        Interval x, y;
+        while ( t<=timeInterval.ub()){
+            x = boatSpeed[i-1]*cos(boatHead)*t + boatState[0];
+            y = boatSpeed[i-1]*sin(boatHead)*t + boatState[1];
+            vibes::drawBox(x.lb(), x.ub(), y.lb(), y.ub(), "[blue]", vibesParams("group", "trajectories"));
+            for (int k = 0; k<obstacles.size(); k++){
+                x = obstacles[k][0]*cos(obstacles[k][3])*t + obstacles[k][1];
+                y = obstacles[k][0]*sin(obstacles[k][3])*t + obstacles[k][2];
+                vibes::drawBox(x.lb(), x.ub(), y.lb(), y.ub(), "[black]", vibesParams("group", "trajectories"));
             }
 
-            //update the boat heading
-            boatHead = atan2(waypoints[i][1] - waypoints[i-1][1], waypoints[i][0] - waypoints[i-1][0]);
-            
-            double t = 0;
-            double dt = 0.5;
-            Interval x, y;
-            while ( t<=timeInterval.ub()){
-                x = boatSpeed[i-1]*cos(boatHead)*t + boatState[0];
-                y = boatSpeed[i-1]*sin(boatHead)*t + boatState[1];
-                vibes::drawBox(x.lb(), x.ub(), y.lb(), y.ub(), "[blue]", vibesParams("group", "trajectories"));
-                for (int k = 0; k<obstacles.size(); k++){
-                    x = obstacles[k][0]*cos(obstacles[k][3])*t + obstacles[k][1];
-                    y = obstacles[k][0]*sin(obstacles[k][3])*t + obstacles[k][2];
-                    vibes::drawBox(x.lb(), x.ub(), y.lb(), y.ub(), "[black]", vibesParams("group", "trajectories"));
-                }
-
-                this_thread::sleep_for(chrono::milliseconds(50));
-                vibes::clearGroup("trajectories");
-                t+= dt;
-            }
+            this_thread::sleep_for(chrono::milliseconds(50));
+            vibes::clearGroup("trajectories");
+            t+= dt;
         }
     }
+}
+
+void drawPath(vector<vector<double>> formerWpts, vector<vector<double>> waypoints, vector<Interval> boatSpeed, IntervalVector boatState, vector<IntervalVector> obstacles, vector<vector<vector<double>>> borderList){
+    vector<double> drawx, drawy;
+
+    for (int i=0; i< formerWpts.size(); i++){
+        drawx.push_back(formerWpts[i][0]);
+        drawy.push_back(formerWpts[i][1]);
+    }
+    
+    vibes::drawLine(drawx, drawy, "yellow");
+
+    for (int i=0; i<borderList.size(); i++){
+        drawx.resize(0);
+        drawy.resize(0);
+        for (int j=0; j<=borderList[i].size(); j++){
+            drawx.push_back(borderList[i][j%borderList[i].size()][0]);
+            drawy.push_back(borderList[i][j%borderList[i].size()][1]);
+        }
+        vibes::drawLine(drawx, drawy, "red");
+    }
+
+    drawx.resize(0);
+    drawy.resize(0);
+    for (int i=0; i< waypoints.size(); i++){
+        drawx.push_back(waypoints[i][0]);
+        drawy.push_back(waypoints[i][1]);
+    }
+    vibes::drawLine(drawx, drawy, "blue");
+
+
+    double boatHead;
+
+    Interval timeInterval;
+
+    for ( int i = 1; i < waypoints.size(); i++){     
+        
+        updateBoatAndObstaclesData(waypoints, boatState, boatSpeed, timeInterval, boatHead, obstacles, i);
+        
+        for (int j = 0; j < obstacles.size(); j++){
+            //for drawing the trajectory of the obstacles :
+            drawx.resize(0);
+            drawy.resize(0);
+            drawx.push_back(obstacles[j][1].mid());
+            drawy.push_back(obstacles[j][2].mid());
+            drawx.push_back((obstacles[j][0]*cos(obstacles[j][3])*timeInterval.ub() + obstacles[j][1]).mid());
+            drawy.push_back((obstacles[j][0]*sin(obstacles[j][3])*timeInterval.ub() + obstacles[j][2]).mid());
+            vibes::drawLine(drawx, drawy, "black");
+        }
+
+    }  
+}
+
 }

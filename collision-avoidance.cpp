@@ -21,6 +21,7 @@ int main(int argc, char** argv){
 
     //coordinate {x,y} of the waypoints
     vector<vector<double>> waypoints = config["waypoints"];
+    vector<vector<double>> formerWpts = waypoints;
     //initial boat speed for each segment
     vector<Interval> boatSpeed(waypoints.size()-1, Interval(config["defaultSpeedInterval"][0],config["defaultSpeedInterval"][1]));
 
@@ -33,27 +34,6 @@ int main(int argc, char** argv){
     cout << "speed :" << endl;
     for (int i = 0; i < boatSpeed.size(); i++){
         cout << boatSpeed[i] << endl;
-    }
-
-    vector<double> drawx, drawy;
-
-    for (int i=0; i< waypoints.size(); i++){
-        drawx.push_back(waypoints[i][0]);
-        drawy.push_back(waypoints[i][1]);
-    }
-    vibes::newFigure("path");
-    vibes::setFigureProperties(vibesParams("x",0 , "y", 0, "width", 800, "height", 800));
-    vibes::drawLine(drawx, drawy, "yellow");
-
-    
-    for (int i=0; i<borderList.size(); i++){
-        drawx.resize(0);
-        drawy.resize(0);
-        for (int j=0; j<=borderList[i].size(); j++){
-            drawx.push_back(borderList[i][j%borderList[i].size()][0]);
-            drawy.push_back(borderList[i][j%borderList[i].size()][1]);
-        }
-        vibes::drawLine(drawx, drawy, "red");
     }
 
     //informations about obstacles
@@ -86,17 +66,8 @@ int main(int argc, char** argv){
     for (int i = 0; i< boatSpeed.size(); i++){
         cout << boatSpeed[i] << endl;
     }
-    vibes::selectFigure("path");
 
-    drawx.resize(0);
-    drawy.resize(0);
-    for (int i=0; i< waypoints.size(); i++){
-        drawx.push_back(waypoints[i][0]);
-        drawy.push_back(waypoints[i][1]);
-    }
-    vibes::drawLine(drawx, drawy, "blue");
-
-    functions::drawTrajectory(waypoints, boatSpeed, boatState, obstacles);
+    functions::drawTrajectory(formerWpts, waypoints, boatSpeed, boatState, obstacles, borderList);
 
     return 0;
 }
