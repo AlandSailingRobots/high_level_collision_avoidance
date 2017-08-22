@@ -76,9 +76,9 @@ void paving(IntervalVector initialBox, vector<shared_ptr<SepInter>> listSep, vec
         Xin = initialBox;
         Xout = initialBox;
     }
-
+    //compute the union of all the separators
     computeUnion(listXout, listXin, XoutEnd, XinEnd);
-    
+    //update the feasible speed set with the complementary of the result of the outer contraction
     buildFeasibleSpeedSet(listBoxes, initialBox, XoutEnd);
 
     vibes::drawBoxes({{XoutEnd[0].lb(), XoutEnd[0].ub(), XoutEnd[1].lb(), XoutEnd[1].ub()}}, "[red]");
