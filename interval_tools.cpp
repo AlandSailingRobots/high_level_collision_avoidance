@@ -118,32 +118,50 @@ void buildFeasibleSpeedSet(vector<IntervalVector>& feasibleSpeedSet, IntervalVec
     delete[] ListComplementary;
 }
 
-void createSepBorder(vector<vector<double>> border, vector<shared_ptr<SepInter>> &listSep, IntervalVector boatInitPos, Interval timeInterval, vector<shared_ptr<Function>> &deleteFunc, vector<shared_ptr<SepFwdBwd>> &deleteInitialSep){
+void createSepBorder(vector<vector<double>> border, vector<shared_ptr<SepInter>> &listSep, IntervalVector boatInitPos, Interval timeInterval, 
+    vector<shared_ptr<Function>> &deleteFunc, vector<shared_ptr<SepFwdBwd>> &deleteInitialSep)
+{
     Variable vx, vy;
 
     for (int i = 0; i < border.size(); i++){
-        shared_ptr<Function> pf1 = shared_ptr<Function>(new Function(vx, vy, ((border[i][0] - (vx*timeInterval.ub() + boatInitPos[0]))*(border[i][1] - boatInitPos[1]) - 
-                                                    (border[i][1] - (vy*timeInterval.ub() + boatInitPos[1]))*(border[i][0] - boatInitPos[0]))*
-                                                    ((border[(i+1)%border.size()][0] - (vx*timeInterval.ub() + boatInitPos[0]))*(border[(i+1)%border.size()][1] - boatInitPos[1]) - 
-                                                    (border[(i+1)%border.size()][1] - (vy*timeInterval.ub() + boatInitPos[1]))*(border[(i+1)%border.size()][0] - boatInitPos[0]))
-                                                    ));
+        shared_ptr<Function> pf1 = 
+        shared_ptr<Function>(new Function(vx, vy, ((border[i][0] - (vx*timeInterval.ub() + boatInitPos[0]))*(border[i][1] - boatInitPos[1]) - 
+                                                                        (border[i][1] - (vy*timeInterval.ub() + boatInitPos[1]))*(border[i][0] - boatInitPos[0]))*
+                                                                        ((border[(i+1)%border.size()][0] - (vx*timeInterval.ub() + boatInitPos[0]))*(border[(i+1)%border.size()][1] - boatInitPos[1]) - 
+                                                                        (border[(i+1)%border.size()][1] - (vy*timeInterval.ub() + boatInitPos[1]))*(border[(i+1)%border.size()][0] - boatInitPos[0]))
+                                                                        ));
         deleteFunc.push_back(pf1);
         
-        shared_ptr<Function> pf2 = shared_ptr<Function>(new Function(vx, vy, ((border[(i+1)%border.size()][0] - border[i][0])*(border[i][1] - boatInitPos[1]) - 
-                                                    (border[(i+1)%border.size()][1] - border[i][1])*(border[i][0] - boatInitPos[0]))*
-                                                    ((border[(i+1)%border.size()][0] - border[i][0])*(border[i][1] - (vy*timeInterval.ub() + boatInitPos[1])) - 
-                                                    (border[(i+1)%border.size()][1] - border[i][1])*(border[i][0] - (vx*timeInterval.ub() + boatInitPos[0])))
-                                                    ));
+        shared_ptr<Function> pf2 = 
+        shared_ptr<Function>(new Function(vx, vy, ((border[(i+1)%border.size()][0] - border[i][0])*(border[i][1] - boatInitPos[1]) - 
+                                                                        (border[(i+1)%border.size()][1] - border[i][1])*(border[i][0] - boatInitPos[0]))*
+                                                                        ((border[(i+1)%border.size()][0] - border[i][0])*(border[i][1] - (vy*timeInterval.ub() + boatInitPos[1])) - 
+                                                                        (border[(i+1)%border.size()][1] - border[i][1])*(border[i][0] - (vx*timeInterval.ub() + boatInitPos[0])))
+                                                                        ));
         deleteFunc.push_back(pf2);
         // seems to work, but not sure about that
-        shared_ptr<Function> pf3 = shared_ptr<Function>(new Function(vx, vy, ibex::max(abs(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::max(boatInitPos[0].ub(), vx*timeInterval.ub() + boatInitPos[0].ub())), sqrt(sqr(ibex::min(boatInitPos[0].lb(), vx*timeInterval.ub() + boatInitPos[0].lb()) - ibex::min(border[i][0], border[(i+1)%border.size()][0])))) -
-                                                    ibex::max(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - ibex::min(border[i][0], border[(i+1)%border.size()][0]), ibex::max(boatInitPos[0].ub(), vx*timeInterval.ub() + boatInitPos[0].ub()) - ibex::min(boatInitPos[0].lb(), vx*timeInterval.ub() + boatInitPos[0].lb()))
-                                                    ));
+        shared_ptr<Function> pf3 = 
+        shared_ptr<Function>(new Function(vx, vy, ibex::max(abs(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - 
+                                                                        ibex::max(boatInitPos[0].ub(), vx*timeInterval.ub() + boatInitPos[0].ub())), 
+                                                                        sqrt(sqr(ibex::min(boatInitPos[0].lb(), vx*timeInterval.ub() + boatInitPos[0].lb()) - 
+                                                                        ibex::min(border[i][0], border[(i+1)%border.size()][0])))) -
+                                                                        ibex::max(ibex::max(border[i][0], border[(i+1)%border.size()][0]) - 
+                                                                        ibex::min(border[i][0], border[(i+1)%border.size()][0]),
+                                                                        ibex::max(boatInitPos[0].ub(), vx*timeInterval.ub() + boatInitPos[0].ub()) - 
+                                                                        ibex::min(boatInitPos[0].lb(), vx*timeInterval.ub() + boatInitPos[0].lb()))
+                                                                        ));
         deleteFunc.push_back(pf3);
 
-        shared_ptr<Function> pf4 = shared_ptr<Function>(new Function(vx, vy, ibex::max(abs(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - ibex::max(boatInitPos[1].ub(), vy*timeInterval.ub() + boatInitPos[1].ub())), sqrt(sqr(ibex::min(boatInitPos[1].lb(), vy*timeInterval.ub() + boatInitPos[1].lb()) - ibex::min(border[i][1], border[(i+1)%border.size()][1])))) -
-                                                    ibex::max(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - ibex::min(border[i][1], border[(i+1)%border.size()][1]), ibex::max(boatInitPos[1].ub(), vy*timeInterval.ub() + boatInitPos[1].ub()) - ibex::min(boatInitPos[1].lb(), vy*timeInterval.ub() + boatInitPos[1].lb()))
-                                                    ));
+        shared_ptr<Function> pf4 = 
+        shared_ptr<Function>(new Function(vx, vy, ibex::max(abs(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - 
+                                                                        ibex::max(boatInitPos[1].ub(), vy*timeInterval.ub() + boatInitPos[1].ub())), 
+                                                                        sqrt(sqr(ibex::min(boatInitPos[1].lb(), vy*timeInterval.ub() + boatInitPos[1].lb()) - 
+                                                                        ibex::min(border[i][1], border[(i+1)%border.size()][1])))) -
+                                                                        ibex::max(ibex::max(border[i][1], border[(i+1)%border.size()][1]) - 
+                                                                        ibex::min(border[i][1], border[(i+1)%border.size()][1]), 
+                                                                        ibex::max(boatInitPos[1].ub(), vy*timeInterval.ub() + boatInitPos[1].ub()) - 
+                                                                        ibex::min(boatInitPos[1].lb(), vy*timeInterval.ub() + boatInitPos[1].lb()))
+                                                                        ));
         deleteFunc.push_back(pf4);
         
         
@@ -163,14 +181,21 @@ void createSepBorder(vector<vector<double>> border, vector<shared_ptr<SepInter>>
     }
 }
 
-void createSepObstacle(IntervalVector obstacles, vector<shared_ptr<SepInter>> &listSep, IntervalVector boatInitPos, Interval timeInterval, vector<shared_ptr<Function>> &deleteFunc, vector<shared_ptr<SepFwdBwd>> &deleteInitialSep){
+void createSepObstacle(IntervalVector obstacles, vector<shared_ptr<SepInter>> &listSep, IntervalVector boatInitPos, 
+    Interval timeInterval, vector<shared_ptr<Function>> &deleteFunc, vector<shared_ptr<SepFwdBwd>> &deleteInitialSep)
+{
     Variable vx, vy;
 
-    shared_ptr<Function> pf1 = shared_ptr<Function>(new Function(vx, vy, (vx - obstacles[0]*cos(obstacles[3]))*timeInterval  +boatInitPos[0] - obstacles[1]));
+    shared_ptr<Function> pf1 = 
+    shared_ptr<Function>(new Function(vx, vy, (vx - obstacles[0]*cos(obstacles[3]))*timeInterval  +boatInitPos[0] - obstacles[1]));
     deleteFunc.push_back(pf1);
-    shared_ptr<Function> pf2 = shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[0]*sin(obstacles[3]))*timeInterval  + boatInitPos[1] - obstacles[2]));
+    shared_ptr<Function> pf2 = 
+    shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[0]*sin(obstacles[3]))*timeInterval  + boatInitPos[1] - obstacles[2]));
     deleteFunc.push_back(pf2);
-    shared_ptr<Function> pf3 = shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[0]*sin(obstacles[3]))*(boatInitPos[0] - obstacles[1]) - (vx - obstacles[0]*cos(obstacles[3]))*(boatInitPos[1] - obstacles[2])));
+    shared_ptr<Function> pf3 = 
+    shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[0]*sin(obstacles[3]))*(boatInitPos[0] - obstacles[1]) - 
+                                                                    (vx - obstacles[0]*cos(obstacles[3]))*(boatInitPos[1] - obstacles[2])
+                                                                    ));
     deleteFunc.push_back(pf3);
 
     shared_ptr<SepFwdBwd> pSep1 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf1, Interval(0,0)));

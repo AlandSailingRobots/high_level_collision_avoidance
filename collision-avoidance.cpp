@@ -50,7 +50,8 @@ int main(int argc, char** argv){
 
     /*initial position of the boat, by default on the 1st waypoint */
     double boatInitPosUncertaintySize = config["boatInitPosUncertaintySize"];
-    double boatStateBounds[2][2] = {{waypoints[0][0] - boatInitPosUncertaintySize/2., waypoints[0][0] + boatInitPosUncertaintySize/2.}, {waypoints[0][1] - boatInitPosUncertaintySize/2., waypoints[0][1] + boatInitPosUncertaintySize/2.}};
+    double boatStateBounds[2][2] = {{waypoints[0][0] - boatInitPosUncertaintySize/2., waypoints[0][0] + boatInitPosUncertaintySize/2.}, 
+                                                    {waypoints[0][1] - boatInitPosUncertaintySize/2., waypoints[0][1] + boatInitPosUncertaintySize/2.}};
     IntervalVector boatState(2, boatStateBounds);
 
     functions::manageCollision(waypoints, boatState, boatSpeed, obstacles, borderList);

@@ -17,9 +17,13 @@ void computeUnion(std::vector<ibex::IntervalVector> listXout, std::vector<ibex::
 
 void buildFeasibleSpeedSet(std::vector<ibex::IntervalVector>& feasibleSpeedSet, ibex::IntervalVector X, ibex::IntervalVector Xout);
 
-void createSepBorder(std::vector<std::vector<double>> border, std::vector<std::shared_ptr<ibex::SepInter>> &listSep, ibex::IntervalVector boatInitPos, ibex::Interval timeInterval, std::vector<std::shared_ptr<ibex::Function>> &deleteFunc, std::vector<std::shared_ptr<ibex::SepFwdBwd>> &deleteInitialSep);
+void createSepBorder(std::vector<std::vector<double>> border, std::vector<std::shared_ptr<ibex::SepInter>> &listSep, 
+	ibex::IntervalVector boatInitPos, ibex::Interval timeInterval, std::vector<std::shared_ptr<ibex::Function>> &deleteFunc, 
+	std::vector<std::shared_ptr<ibex::SepFwdBwd>> &deleteInitialSep);
 
-void createSepObstacle(ibex::IntervalVector obstacles, std::vector<std::shared_ptr<ibex::SepInter>> &listSep, ibex::IntervalVector boatInitPos, ibex::Interval timeInterval, std::vector<std::shared_ptr<ibex::Function>> &deleteFunc, std::vector<std::shared_ptr<ibex::SepFwdBwd>> &deleteInitialSep);
+void createSepObstacle(ibex::IntervalVector obstacles, std::vector<std::shared_ptr<ibex::SepInter>> &listSep, 
+	ibex::IntervalVector boatInitPos, ibex::Interval timeInterval, std::vector<std::shared_ptr<ibex::Function>> &deleteFunc, 
+	std::vector<std::shared_ptr<ibex::SepFwdBwd>> &deleteInitialSep);
 
 bool collisionCondition(ibex::Interval v, ibex::Interval x0, ibex::Interval y0, double th, ibex::Interval vi, ibex::Interval xi, ibex::Interval yi, ibex::Interval thi, ibex::Interval t);
 
