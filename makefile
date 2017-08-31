@@ -11,7 +11,7 @@ LIBS	 = $(shell pkg-config --libs  ibex)
 ifeq ($(DEBUG), yes)
 CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall
 else
-CXXFLAGS := $(CXXFLAGS)
+CXXFLAGS := $(CXXFLAGS) -std=c++11
 endif
 
 collision-avoidance: collision-avoidance.o functions.o interval_tools.o vibes.o
