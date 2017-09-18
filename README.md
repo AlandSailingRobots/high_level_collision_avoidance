@@ -41,7 +41,7 @@ size of the uncertainty of the initial position of the boat (diameter of the 2 i
 ### defaultSpeedInterval :
 [default speed lower bounds, default speed upper bounds]  
 
-### useProjForBuildingObstacleSeparator :
+### useProjectionForBuildingObstacleSeparator :
 true or false
 
 ## Outputs of the algorithm
