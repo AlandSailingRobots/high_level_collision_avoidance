@@ -41,6 +41,9 @@ size of the uncertainty of the initial position of the boat (diameter of the 2 i
 ### defaultSpeedInterval :
 [default speed lower bounds, default speed upper bounds]  
 
+### useProjForBuildingObstacleSeparator :
+true or false
+
 ## Outputs of the algorithm
 
 This algorithm outputs a drawing of the trajectory of the boat and of the other boats. The route before collision avoidance is displayed in yellow, after collision avoidance in blue. The sailing zone borders are displayed in red. The route of the other boats are displayed in black.
