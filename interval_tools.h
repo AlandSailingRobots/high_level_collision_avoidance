@@ -1,5 +1,6 @@
 #include "ibex.h"
 #include "vibes.h"
+#include "sepProj.h"
 #include <memory>
 
 
@@ -21,9 +22,13 @@ void createSepBorder(std::vector<std::vector<double>> border, std::vector<std::s
 	ibex::IntervalVector boatInitPos, ibex::Interval timeInterval, std::vector<std::shared_ptr<ibex::Function>> &deleteFunc, 
 	std::vector<std::shared_ptr<ibex::SepFwdBwd>> &deleteInitialSep);
 
-void createSepObstacle(ibex::IntervalVector obstacles, std::vector<std::shared_ptr<ibex::SepInter>> &listSep, 
+void createSepObstacleWithoutProj(ibex::IntervalVector obstacles, std::vector<std::shared_ptr<ibex::SepInter>> &listSep, 
 	ibex::IntervalVector boatInitPos, ibex::Interval timeInterval, std::vector<std::shared_ptr<ibex::Function>> &deleteFunc, 
 	std::vector<std::shared_ptr<ibex::SepFwdBwd>> &deleteInitialSep);
+
+void createSepObstacleWithProj(ibex::IntervalVector obstacles, std::vector<std::shared_ptr<ibex::SepInter>> &listSep, 
+	ibex::IntervalVector boatInitPos, ibex::Interval timeInterval, std::vector<std::shared_ptr<ibex::Function>> &deleteFunc, 
+	std::vector<std::shared_ptr<ibex::SepFwdBwd>> &deleteInitialSep, std::vector<std::shared_ptr<SepProj>> &deleteInitialSepProj);
 
 bool collisionCondition(ibex::Interval v, ibex::Interval x0, ibex::Interval y0, double th, ibex::Interval vi, ibex::Interval xi, ibex::Interval yi, ibex::Interval thi, ibex::Interval t);
 

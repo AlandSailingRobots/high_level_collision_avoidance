@@ -54,7 +54,11 @@ int main(int argc, char** argv){
                                                     {waypoints[0][1] - boatInitPosUncertaintySize/2., waypoints[0][1] + boatInitPosUncertaintySize/2.}};
     IntervalVector boatState(2, boatStateBounds);
 
-    functions::manageCollision(waypoints, boatState, boatSpeed, obstacles, borderList);
+    /* choose if we use projection or not for building the separators of the obstacles, 0 we don't use
+     projection, 1 we use projection*/
+    bool useProjectionForBuildingObstacleSeparator = config["useProjectionForBuildingObstacleSeparator"];
+
+    functions::manageCollision(waypoints, boatState, boatSpeed, obstacles, borderList, useProjectionForBuildingObstacleSeparator);
 
     cout << "after collision avoidance" << endl;
     cout << "waypoints :" << endl;

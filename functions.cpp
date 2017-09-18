@@ -3,7 +3,6 @@
 #include <math.h>
 #include "ibex.h"
 #include "vibes.h"
-#include "interval_tools.h"
 #include "functions.h"
 
 using namespace ibex;
@@ -11,7 +10,7 @@ using namespace std;
 
 namespace functions{
 void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState, vector<Interval>& boatSpeed, 
-    vector<IntervalVector> obstacles, vector<vector<vector<double>>> borderList)
+    vector<IntervalVector> obstacles, vector<vector<vector<double>>> borderList, bool useProjectionForBuildingObstacleSeparator)
 {
     const double timeSafetyMargin = 1.05;
     double boatHead;  
@@ -32,7 +31,7 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
                 obstacles[j][2], obstacles[j][3], timeInterval*timeSafetyMargin))
             {
                 cout << "collision detected in the " << i <<" segment, with obstacles " << j << endl;
-                pathReplanning(boatHead, boatSpeed[i-1], boatState, timeInterval*timeSafetyMargin, obstacles, borderList);
+                pathReplanning(boatHead, boatSpeed[i-1], boatState, timeInterval*timeSafetyMargin, obstacles, borderList, useProjectionForBuildingObstacleSeparator);
                 waypointManagement(boatHead, boatSpeed, boatState, timeInterval.ub(), waypoints, i);
                 collisionDetected = 1;
             }
@@ -48,7 +47,7 @@ void manageCollision(vector<vector<double>>& waypoints, IntervalVector boatState
                     borderList[j][k], borderList[j][(k+1)%borderList[j].size()]))
                 {
                     cout << "collision detected in the " << i << " segment, with the " << k << " segment of the " << j << " border" << endl;
-                    pathReplanning(boatHead, boatSpeed[i-1], boatState, timeInterval*timeSafetyMargin, obstacles, borderList);
+                    pathReplanning(boatHead, boatSpeed[i-1], boatState, timeInterval*timeSafetyMargin, obstacles, borderList, useProjectionForBuildingObstacleSeparator);
                     waypointManagement(boatHead, boatSpeed, boatState, timeInterval.ub(), waypoints, i);
                     collisionDetected = 1;
                 }
@@ -103,7 +102,7 @@ void waypointManagement(double boatHead, vector<Interval>& boatSpeed, IntervalVe
 }
 
 void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState, Interval timeInterval, 
-    vector<IntervalVector> obstacles, vector<vector<vector<double>>> borderList)
+    vector<IntervalVector> obstacles, vector<vector<vector<double>>> borderList, bool useProjectionForBuildingObstacleSeparator)
 {
     IntervalVector speedComponents(2);
     speedComponents[0] = speed*cos(boatHead);
@@ -123,6 +122,8 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
     
     vector<shared_ptr<SepFwdBwd>> listInitialSep;
 
+    vector<shared_ptr<SepProj>> listInitialSepProj;
+
     //compute separators for the borders (exterior borders and islands borders), the union is in the paving method
     for (int i = 0; i<borderList.size(); i++){
         createSepBorder(borderList[i], listSep, boatState, timeInterval, listFunc, listInitialSep);
@@ -130,7 +131,13 @@ void pathReplanning(double& boatHead, Interval& speed, IntervalVector boatState,
 
     //build one separator per obstacles, the union is made in the paving method
     for ( int i = 0; i < obstacles.size(); i++){
-        createSepObstacle(obstacles[i], listSep, boatState, timeInterval, listFunc, listInitialSep);
+        if (useProjectionForBuildingObstacleSeparator){
+            createSepObstacleWithProj(obstacles[i], listSep, boatState, timeInterval, listFunc, listInitialSep, listInitialSepProj);
+        }
+        else
+        {
+            createSepObstacleWithoutProj(obstacles[i], listSep, boatState, timeInterval, listFunc, listInitialSep);
+        }
     }
 
     double speedIntervalBounds[2][2] = {{-5,5},{-5,5}};

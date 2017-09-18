@@ -14,20 +14,23 @@ else
 CXXFLAGS := $(CXXFLAGS) -std=c++11
 endif
 
-collision-avoidance: collision-avoidance.o functions.o interval_tools.o vibes.o
+collision-avoidance: collision-avoidance.o vibes.o sepProj.o interval_tools.o functions.o
 	$(CXX) $^ -o collision-avoidance $(CXXFLAGS) $(LIBS)
 
 
 vibes.o: vibes.h vibes.cpp
 	$(CXX) vibes.cpp -c $(CXXFLAGS) $(LIBS)
 
-interval_tools.o: interval_tools.h vibes.h interval_tools.cpp
+sepProj.o: sepProj.h sepProj.cpp
+	$(CXX) sepProj.cpp -c $(CXXFLAGS) $(LIBS)
+
+interval_tools.o: interval_tools.h vibes.h sepProj.h interval_tools.cpp
 	$(CXX) interval_tools.cpp -c $(CXXFLAGS) $(LIBS)
 
 functions.o: functions.h interval_tools.h vibes.h functions.cpp
 	$(CXX) functions.cpp -c $(CXXFLAGS) $(LIBS)
 
-collision-avoidance.o: functions.h vibes.h interval_tools.h json.hpp collision-avoidance.cpp
+collision-avoidance.o:  vibes.h sepProj.h interval_tools.h functions.h json.hpp collision-avoidance.cpp
 	$(CXX) collision-avoidance.cpp -c $(CXXFLAGS) $(LIBS)
 
 

@@ -181,21 +181,21 @@ void createSepBorder(vector<vector<double>> border, vector<shared_ptr<SepInter>>
     }
 }
 
-void createSepObstacle(IntervalVector obstacles, vector<shared_ptr<SepInter>> &listSep, IntervalVector boatInitPos, 
+void createSepObstacleWithoutProj(IntervalVector obstacles, vector<shared_ptr<SepInter>> &listSep, IntervalVector boatInitPos, 
     Interval timeInterval, vector<shared_ptr<Function>> &deleteFunc, vector<shared_ptr<SepFwdBwd>> &deleteInitialSep)
 {
     Variable vx, vy;
 
     shared_ptr<Function> pf1 = 
-    shared_ptr<Function>(new Function(vx, vy, (vx - obstacles[0]*cos(obstacles[3]))*timeInterval  +boatInitPos[0] - obstacles[1]));
+    shared_ptr<Function>(new Function(vx, vy, (vx - obstacles[0]*cos(obstacles[3]))*timeInterval + boatInitPos[0] - obstacles[1]));
     deleteFunc.push_back(pf1);
     shared_ptr<Function> pf2 = 
-    shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[0]*sin(obstacles[3]))*timeInterval  + boatInitPos[1] - obstacles[2]));
+    shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[0]*sin(obstacles[3]))*timeInterval + boatInitPos[1] - obstacles[2]));
     deleteFunc.push_back(pf2);
     shared_ptr<Function> pf3 = 
     shared_ptr<Function>(new Function(vx, vy, (vy - obstacles[0]*sin(obstacles[3]))*(boatInitPos[0] - obstacles[1]) - 
-                                                                    (vx - obstacles[0]*cos(obstacles[3]))*(boatInitPos[1] - obstacles[2])
-                                                                    ));
+                                                (vx - obstacles[0]*cos(obstacles[3]))*(boatInitPos[1] - obstacles[2])
+                                                ));
     deleteFunc.push_back(pf3);
 
     shared_ptr<SepFwdBwd> pSep1 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf1, Interval(0,0)));
@@ -206,6 +206,50 @@ void createSepObstacle(IntervalVector obstacles, vector<shared_ptr<SepInter>> &l
     deleteInitialSep.push_back(pSep3);
 
     shared_ptr<SepInter> pSep = shared_ptr<SepInter>(new SepInter(*pSep1, *pSep2, *pSep3));
+
+    listSep.push_back(pSep);
+}
+
+void createSepObstacleWithProj(IntervalVector obstacles, vector<shared_ptr<SepInter>> &listSep, IntervalVector boatInitPos, 
+    Interval timeInterval, vector<shared_ptr<Function>> &deleteFunc, vector<shared_ptr<SepFwdBwd>> &deleteInitialSep, vector<shared_ptr<SepProj>> &deleteInitialSepProj)
+{
+    Variable vx, vy, ai, bi, t, x0, xi0;
+
+    shared_ptr<Function> pf1 = 
+    shared_ptr<Function>(new Function(vx, vy, ai, bi, t, (vx - ai)*t));
+    deleteFunc.push_back(pf1);
+    shared_ptr<Function> pf2 = 
+    shared_ptr<Function>(new Function(vx, vy, ai, bi, t, (vy - bi)*t));
+    deleteFunc.push_back(pf2);
+    shared_ptr<Function> pf3 = 
+    shared_ptr<Function>(new Function(vx, vy, ai, bi, t, x0, xi0, ((vy - bi)/(vx - ai))*(xi0 - x0)));
+    deleteFunc.push_back(pf3);
+
+    IntervalVector proj1(3);
+    IntervalVector proj2(5);
+    proj1[0] = obstacles[0]*cos(obstacles[3]);
+    proj1[1] = obstacles[0]*sin(obstacles[3]);
+    proj1[2] = timeInterval;
+    proj2[0] = proj1[0];
+    proj2[1] = proj1[1];
+    proj2[2] = proj1[2];
+    proj2[3] = boatInitPos[0];
+    proj2[4] = obstacles[1];
+
+    shared_ptr<SepFwdBwd> pSep1 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf1, obstacles[1] - boatInitPos[0]));
+    deleteInitialSep.push_back(pSep1);
+    shared_ptr<SepFwdBwd> pSep2 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf2, obstacles[2] - boatInitPos[1]));
+    deleteInitialSep.push_back(pSep2);
+    shared_ptr<SepFwdBwd> pSep3 = shared_ptr<SepFwdBwd>(new SepFwdBwd(*pf3, obstacles[2] - boatInitPos[1]));
+    deleteInitialSep.push_back(pSep3);
+    shared_ptr<SepProj> pSepProj1 = shared_ptr<SepProj>(new SepProj(*pSep1, proj1, 1000000));
+    deleteInitialSepProj.push_back(pSepProj1);
+    shared_ptr<SepProj> pSepProj2 = shared_ptr<SepProj>(new SepProj(*pSep2, proj1, 1000000));
+    deleteInitialSepProj.push_back(pSepProj2);
+    shared_ptr<SepProj> pSepProj3 = shared_ptr<SepProj>(new SepProj(*pSep3, proj2, 1000000));
+    deleteInitialSepProj.push_back(pSepProj3);
+
+    shared_ptr<SepInter> pSep = shared_ptr<SepInter>(new SepInter(*pSepProj1, *pSepProj2, *pSepProj3));
 
     listSep.push_back(pSep);
 }
